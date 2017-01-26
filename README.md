@@ -1,1 +1,3 @@
-I'm a README!
+#Kenny Lee
+## 110399706
+:cry:
