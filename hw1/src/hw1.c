@@ -4,6 +4,9 @@
 // DO NOT define a main function here!
 int argSize(char* ptr);
 int alphabetSize();
+int isNum(char t); //checks if char between ascii 48 to 57, 0 is false, 1 is true
+int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
+int asciiToDecimal(char* ptr); //takes in char arr
 
 char validargs(int argc, char** argv, FILE** in, FILE** out) {
 	char ret = 0;
@@ -50,9 +53,16 @@ $ bin/hw1 -t -d infile outfile*/
 			return ret;
 					//the other arguments are invalid if it isn't -d or -e and thus throws error
 		}
-		if( argc ==6)// SOMETHING WENT WRONG HERE
+		if( argc ==6)		//MIGHT NEED TO CHECK FOR INVALIC CHARACTERS
 		{
-			arg6 = **(argv+5); //de-reference once to get n  ***MIGHT WANT TO RECHECK THIS
+			if( isValidArg6(*(argv+5)) == 0 ) //not valid arg (not a numeric) for arg6 if isValidArg6 returns 0
+			{
+				ret =0;
+				return ret;
+			}
+
+			arg6 = asciiToDecimal(*(argv+5)); //de-reference once to get n  ***MIGHT WANT TO RECHECK THIS
+
 			printf("argv+5 %p\n",(void*)(argv+5));
 			printf("(*(argv+5)) %s\n",(*(argv+5)));
 		}
@@ -68,12 +78,11 @@ $ bin/hw1 -t -d infile outfile*/
 		if( *(*(argv+2))=='-' && *((*(argv+2))+1) =='d')
 		{
 			ret= ret|0x20;
-			ret = ret |0x1;	//last 5 lsb must be non-zero
+
 		}
 		else if( *(*(argv+2))=='-' && *((*(argv+2))+1) =='e')
 		{
 			ret+=0; //third bit is 0, don't really do anything, placeholder code here for reading purposes
-			ret = ret |0x1;	//last 5 lsb must be non-zero
 		}
 		else
 		{
@@ -81,6 +90,8 @@ $ bin/hw1 -t -d infile outfile*/
 			return ret;
 					//the other arguments are invalid if it isn't -d or -e and thus throws error
 		}
+			ret = ret |0x1;	//last 5 lsb must be non-zero
+
 	}
 	else
 		{
@@ -133,6 +144,37 @@ else ret = 0;
 	return ret;
 }
 
+int isNum(char t)		//checks if char between ascii 48 to 57, 0 is false, 1 is true
+{
+	if( (t - 48)>=0 && (t-48)<=9)
+		return 1;
+	return 0;
+}
+int isValidArg6(char* ptr) //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
+{
+	int i=0;
+	while(*((ptr)+i)!=0)
+	{
+		if( isNum(*((ptr)+i)) ==0)
+			return 0;
+		i++;
+	}
+	return 1;
+}
+int asciiToDecimal(char* ptr) //takes in char arr
+{
+	int i = 1;
+	int tmp = ((int)(*((ptr)+0)))-48; //point to first char in the arr,take it's ascii value, then -48 to get 0-9
+	while( *((ptr)+i) != 0)	//atoui??? while  arr does not terminate
+	{
+		tmp*=10;			//increment, so if char arr = 55, 5 * 10 , then add 5
+		tmp+=((int)(*((ptr)+i)))-48;
+		i++;
+	}
+	return tmp;
+
+}
+//return size of alphabet
 int alphabetSize()
 {
 	int i =0;
