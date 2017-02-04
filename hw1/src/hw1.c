@@ -22,8 +22,8 @@ if error opening input or output file, return 0
 int i = argSize(*(argv+1)); // argSize funct = length of argument used to check if this is -h with nothing trailing behind
 
 
-printf("kappa, i = %d\n",i);
-printf("Args: %d\n",argc);
+//printf("kappa, i = %d\n",i);
+//printf("Args: %d\n",argc);
 int arg6 = 320;
 
 if(argc == 5 || argc == 6)
@@ -63,12 +63,12 @@ $ bin/hw1 -t -d infile outfile*/
 
 			arg6 = asciiToDecimal(*(argv+5)); //de-reference once to get n  ***MIGHT WANT TO RECHECK THIS
 
-			printf("argv+5 %p\n",(void*)(argv+5));
-			printf("(*(argv+5)) %s\n",(*(argv+5)));
+//			printf("argv+5 %p\n",(void*)(argv+5));
+//			printf("(*(argv+5)) %s\n",(*(argv+5)));
 		}
-		printf("alphabetSize %d Arg6 %d\n",alphabetSize(), arg6);
+	//	printf("alphabetSize %d Arg6 %d\n",alphabetSize(), arg6);
 		int retDec = arg6 % alphabetSize(); //take the alphabetsize, and mod that with n (which is arg6, 320 default, else n)
-		printf("retDec %d\n",retDec);
+	//	printf("retDec %d\n",retDec);
 
 		ret = ret | (char)retDec;
 
@@ -100,9 +100,8 @@ $ bin/hw1 -t -d infile outfile*/
 					//the other arguments are invalid (not -s ||-t) and thus throws error
 		}
 
-
 	//open files, if inputfile cannot be opened, fail, if outputfile DNE, create, else overwrite it, if special value stdout / stdin
-/*
+
 	if( *(*(argv+4)) =='-')
 	{
 		*in = stdin;
@@ -116,7 +115,7 @@ $ bin/hw1 -t -d infile outfile*/
 	}
 	else
 		*out = fopen( (*(argv+5)), "w");	//outfile
-*/
+
 
 }
 else if(i==2 && *(*(argv+1))=='-' && *((*(argv+1))+1) =='h')
