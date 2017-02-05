@@ -9,7 +9,8 @@ int findAlphabet(char c); //finding alphabet position, -1 if not existent
 char alphabetLowerToUpperCase(char lower);//converts lower to uppercase if it's a lowercase
 int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 int asciiToDecimal(char* ptr); //takes in char arr
-
+int findTutneseChar(char c);
+void tutnese(FILE* in, FILE* out);
 char validargs(int argc, char** argv, FILE** in, FILE** out) {
 	char ret = 0;
 /*
@@ -166,6 +167,29 @@ int findAlphabet(char c)
 	}
 	return -1;
 }
+void tutnese(FILE* in, FILE* out)
+{
+	int firstChar = getc(in);
+
+	//grab first and second char, if they are the same, do whatever you need to do
+	//else check first char and  loop to see if one of the characters fulfills the req
+	//ignore vowels
+}
+
+//return -1 if fail to find char
+int findTutneseChar(char c)
+{
+	int i =0;
+	while (*(Tutnese+i) != 0) //while char array not null, loop
+	{
+		char firstTutChar =  **(Tutnese+i); // take first char of string of string arr
+		if(firstTutChar == c)
+			return i;
+		i++;
+	}
+	return -1;
+}
+
 void shiftStringDecr(FILE* in, FILE* out, int n) //alphabet shift to right, strings shift left
 {
 	int c = getc(in);
