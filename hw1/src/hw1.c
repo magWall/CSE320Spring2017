@@ -5,6 +5,7 @@
 int argSize(char* ptr);
 int alphabetSize();
 int isNum(char t); //checks if char between ascii 48 to 57, 0 is false, 1 is true
+char alphabetLowerToUpperCase(char lower);//converts lower to uppercase if it's a lowercase
 int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 int asciiToDecimal(char* ptr); //takes in char arr
 
@@ -151,6 +152,15 @@ int isNum(char t)		//checks if char between ascii 48 to 57, 0 is false, 1 is tru
 		return 1;
 	return 0;
 }
+
+void shiftStringEncr(FILE* in, FILE* out, int n)
+{
+
+	//scan file or whatnot
+
+	//take the in ptr's address, loop and see if it's part of the alphabet, if it is , shift by taking the position of that char in arr+n %alphabetsize
+	//else leave it alone and store keep it in the next char, then write that new char array into output file
+}
 int isValidArg6(char* ptr) //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 {
 	int i=0;
@@ -174,6 +184,19 @@ int asciiToDecimal(char* ptr) //takes in char arr
 	}
 	return tmp;
 
+}
+//probably do not need this function, piazza just said read buffer + immediately output
+void convertLowerAlphabetChars(char* ptr)		//may need to check this out, potentially erroronous with pass by ref, not entirely sure
+{
+	int i=0;
+	while ( *((ptr)+i) != 0)
+		*((ptr)+i) = alphabetLowerToUpperCase(*((ptr)+i));
+}
+char alphabetLowerToUpperCase(char lower)
+{
+	if(lower >= 97 && lower <=122)
+		return (lower -32);		//if character is an lower case (97 =a, 122 = z), subtract 32 to make it upper case, else ignore
+	return lower;
 }
 //return size of alphabet
 int alphabetSize()

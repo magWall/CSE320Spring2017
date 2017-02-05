@@ -11,8 +11,12 @@ int main(int argc, char **argv) {
     	return EXIT_FAILURE;
    // char maskedBits = 0x1F;
    // int n = (int)(data &maskedBits);
-
-
+    int c = getc(in);
+    while( c !=EOF)
+    {
+    	putchar(c);
+    	c = getc(in);
+    }
     //substitutionCypher(FILE* in, FILE* out, n)
     return EXIT_SUCCESS;
 }
