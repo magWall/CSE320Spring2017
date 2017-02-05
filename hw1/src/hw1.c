@@ -90,7 +90,9 @@ $ bin/hw1 -t -d infile outfile*/
 			return ret;
 					//the other arguments are invalid if it isn't -d or -e and thus throws error
 		}
-			ret = ret |0x1;	//last 5 lsb must be non-zero
+			int retDec = arg6 % alphabetSize();
+
+			ret = ret |(char)retDec;	//last 5 lsb must be non-zero
 
 	}
 	else
@@ -102,19 +104,19 @@ $ bin/hw1 -t -d infile outfile*/
 
 	//open files, if inputfile cannot be opened, fail, if outputfile DNE, create, else overwrite it, if special value stdout / stdin
 
-	if( *(*(argv+4)) =='-')
+	if( *(*(argv+3)) =='-')
 	{
 		*in = stdin;
 	}
 	else
-		*in = fopen( (*(argv+4)),"r"); //infile
+		*in = fopen( (*(argv+3)),"r"); //infile
 
-	if( *(*(argv+5)) =='-')
+	if( *(*(argv+4)) =='-')
 	{
 		*out = stdout;
 	}
 	else
-		*out = fopen( (*(argv+5)), "w");	//outfile
+		*out = fopen( (*(argv+4)), "w");	//outfile
 
 
 }
