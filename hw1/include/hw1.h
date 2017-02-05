@@ -18,6 +18,8 @@
  * @return Refer to homework document for the return value of this function.
  */
 char validargs(int argc, char **argv, FILE **in, FILE **out);
+void shiftStringDecr(FILE* in, FILE* out, int n); //decryption
+void shiftStringEncr(FILE* in, FILE* out, int n); //encryption
 
 
 #define USAGE(retcode) do{                                                        \

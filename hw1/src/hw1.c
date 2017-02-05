@@ -6,7 +6,6 @@ int argSize(char* ptr);
 int alphabetSize();
 int isNum(char t); //checks if char between ascii 48 to 57, 0 is false, 1 is true
 int findAlphabet(char c); //finding alphabet position, -1 if not existent
-void shiftStringEncr(FILE* in, FILE* out, int n); //encryption
 char alphabetLowerToUpperCase(char lower);//converts lower to uppercase if it's a lowercase
 int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 int asciiToDecimal(char* ptr); //takes in char arr
@@ -166,6 +165,24 @@ int findAlphabet(char c)
 		i++;
 	}
 	return -1;
+}
+void shiftStringDecr(FILE* in, FILE* out, int n) //shift to right
+{
+	int c = getc(in);
+	int lengthofAlphabet = alphabetSize();
+	while( c!= EOF)
+	{
+		c = alphabetLowerToUpperCase((char)c); //change to uppercase
+		int alphabetPos = findAlphabet((char)c);
+		if(alphabetPos != -1)
+		{
+			c =  *((Alphabet)+((alphabetPos+n)%lengthofAlphabet) );
+		}
+		putchar(c);//print to terminal
+		fputc(c, out); //write to stream
+		c = getc(in);
+	}
+	fclose(in);
 }
 void shiftStringEncr(FILE* in, FILE* out, int n)
 {
