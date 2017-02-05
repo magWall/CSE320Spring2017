@@ -5,6 +5,8 @@
 int argSize(char* ptr);
 int alphabetSize();
 int isNum(char t); //checks if char between ascii 48 to 57, 0 is false, 1 is true
+int findAlphabet(char c); //finding alphabet position, -1 if not existent
+void shiftStringEncr(FILE* in, FILE* out, int n); //encryption
 char alphabetLowerToUpperCase(char lower);//converts lower to uppercase if it's a lowercase
 int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 int asciiToDecimal(char* ptr); //takes in char arr
@@ -152,13 +154,42 @@ int isNum(char t)		//checks if char between ascii 48 to 57, 0 is false, 1 is tru
 		return 1;
 	return 0;
 }
+//check if character is in the alphabet array, if so, return the position of the char, else return -1. Assumes character is case-sensitive
 
+int findAlphabet(char c)
+{
+	int i=0;
+	while( *(Alphabet+i) !=0)
+	{
+		if (c == *(Alphabet+i) )		//essentially if  A[i] == c
+			return i;
+		i++;
+	}
+	return -1;
+}
 void shiftStringEncr(FILE* in, FILE* out, int n)
 {
-
+	int c = getc(in);
+	int lengthofAlphabet = alphabetSize();
+	while( c!= EOF)
+	{
+		c = alphabetLowerToUpperCase((char)c); //change to uppercase
+		int alphabetPos = findAlphabet((char)c);
+		if(alphabetPos != -1)
+		{
+			if((alphabetPos-n)%lengthofAlphabet >=0) //if parsing doesn't go negative, keep the equation as is
+				c =  *((Alphabet)+((alphabetPos-n)%lengthofAlphabet) );
+			else
+				c =  *((Alphabet)+lengthofAlphabet+((alphabetPos-n)%lengthofAlphabet) ); //<=0, accomodate by adding the length to make the change positive
+		}
+		putchar(c);//print to terminal
+		fputc(c, out); //write to stream
+		c = getc(in);
+	}
+	fclose(in);
 	//scan file or whatnot
 
-	//take the in ptr's address, loop and see if it's part of the alphabet, if it is , shift by taking the position of that char in arr+n %alphabetsize
+	//take the in ptr's address, loop and see if it's part of the alphabet, if it is , shift left by taking the position of that char in arr+n %alphabetsize
 	//else leave it alone and store keep it in the next char, then write that new char array into output file
 }
 int isValidArg6(char* ptr) //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true

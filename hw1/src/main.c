@@ -15,8 +15,10 @@ int main(int argc, char **argv) {
     while( c !=EOF)
     {
     	putchar(c);
+    	fputc(c, out);
     	c = getc(in);
     }
+    fclose(in);
     //substitutionCypher(FILE* in, FILE* out, n)
     return EXIT_SUCCESS;
 }
