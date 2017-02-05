@@ -47,7 +47,7 @@ $ bin/hw1 -t -d infile outfile*/
 		}
 		else if( *(*(argv+2))=='-' && *((*(argv+2))+1) =='e')
 		{
-			ret+=0;			//third bit is 0, don't really do anything, placeholder code here for reading purposes
+			ret = ret|0x0;	//third bit is 0, don't really do anything, placeholder code here for reading purposes
 		}
 		else
 		{
@@ -166,25 +166,7 @@ int findAlphabet(char c)
 	}
 	return -1;
 }
-void shiftStringDecr(FILE* in, FILE* out, int n) //shift to right
-{
-	int c = getc(in);
-	int lengthofAlphabet = alphabetSize();
-	while( c!= EOF)
-	{
-		c = alphabetLowerToUpperCase((char)c); //change to uppercase
-		int alphabetPos = findAlphabet((char)c);
-		if(alphabetPos != -1)
-		{
-			c =  *((Alphabet)+((alphabetPos+n)%lengthofAlphabet) );
-		}
-		putchar(c);//print to terminal
-		fputc(c, out); //write to stream
-		c = getc(in);
-	}
-	fclose(in);
-}
-void shiftStringEncr(FILE* in, FILE* out, int n)
+void shiftStringDecr(FILE* in, FILE* out, int n) //alphabet shift to right, strings shift left
 {
 	int c = getc(in);
 	int lengthofAlphabet = alphabetSize();
@@ -199,7 +181,27 @@ void shiftStringEncr(FILE* in, FILE* out, int n)
 			else
 				c =  *((Alphabet)+lengthofAlphabet+((alphabetPos-n)%lengthofAlphabet) ); //<=0, accomodate by adding the length to make the change positive
 		}
-		putchar(c);//print to terminal
+		//putchar(c);//print to terminal
+		fputc(c, out); //write to stream
+		c = getc(in);
+	}
+	fclose(in);
+}
+void shiftStringEncr(FILE* in, FILE* out, int n)   //assuming it's the alphabet array that should be shifted, and strings just  take char positions
+{
+	int c = getc(in);
+	int lengthofAlphabet = alphabetSize();
+	while( c!= EOF)
+	{
+
+		c = alphabetLowerToUpperCase((char)c); //change to uppercase
+		int alphabetPos = findAlphabet((char)c);
+
+		if(alphabetPos != -1)
+		{
+			c =  *((Alphabet)+((alphabetPos+n)%lengthofAlphabet) );
+		}
+		//putchar(c);//print to terminal
 		fputc(c, out); //write to stream
 		c = getc(in);
 	}
@@ -243,7 +245,7 @@ void convertLowerAlphabetChars(char* ptr)		//may need to check this out, potenti
 char alphabetLowerToUpperCase(char lower)
 {
 	if(lower >= 97 && lower <=122)
-		return (lower -32);		//if character is an lower case (97 =a, 122 = z), subtract 32 to make it upper case, else ignore
+		return (lower - 32);		//if character is an lower case (97 =a, 122 = z), subtract 32 to make it upper case, else ignore
 	return lower;
 }
 //return size of alphabet

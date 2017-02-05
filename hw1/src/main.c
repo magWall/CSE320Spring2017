@@ -8,13 +8,15 @@ int main(int argc, char **argv) {
     /* Note: create a variable to assign the result of validargs */
     char data = validargs(argc, argv, &in, &out);
     if(data == 0)
-    	USAGE(data); //call usage if it's a zero
-    	//{return EXIT_FAILURE;}
+    	{
+	    	USAGE(data); //call usage if it's a zero
+	    	return EXIT_FAILURE;
+	    }
     char maskedBits = 0x80;
     int hFlag = (int)(data & maskedBits);
     if(hFlag == 128)
     	{
-    		//displayUSAGE
+    		USAGE(data);
     		return EXIT_SUCCESS;
     	}
     maskedBits = 0x40; //1 = substitution, 0 = tut
@@ -25,7 +27,7 @@ int main(int argc, char **argv) {
 		int encrDecr = (int)(data&maskedBits);
 		maskedBits = 0x1F; //get last 5 lsb bits
 	    int n = (int)(data &maskedBits);
-		if(encrDecr==32) //if decr
+	    if(encrDecr==32) //if decr
 			shiftStringDecr(in, out, n);
 		else
 			shiftStringEncr(in, out, n);
@@ -34,7 +36,7 @@ int main(int argc, char **argv) {
     else
     {
     	//assuming validargs works perfectly, then the only last outcome can be  tut
-    }
+    } /*
     int c = getc(in);
     while( c !=EOF)
     {
@@ -42,7 +44,7 @@ int main(int argc, char **argv) {
     	fputc(c, out);
     	c = getc(in);
     }
-    fclose(in);
+    fclose(in); */
     //substitutionCypher(FILE* in, FILE* out, n)
     return EXIT_SUCCESS;
 }
