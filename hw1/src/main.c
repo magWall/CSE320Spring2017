@@ -1,5 +1,5 @@
 #include "hw1.h"
-#include "info.h"
+//#include "info.h"
 
 int main(int argc, char **argv) {
 
@@ -36,7 +36,6 @@ int main(int argc, char **argv) {
 	}
     else
     {
-    	printf("tut\n");
     	maskedBits = 0x20;
 		int encrDecr = (int)(data&maskedBits);
 	    if(encrDecr==32) //if Tut decr
@@ -44,16 +43,7 @@ int main(int argc, char **argv) {
 		else
 			tutneseEncr(in, out);
 		//assuming validargs works perfectly, then the only last outcome can be  tut
-    } /*
-
-    int c = getc(in);
-    while( c !=EOF)
-    {
-    	putchar(c);
-    	fputc(c, out);
-    	c = getc(in);
     }
-    fclose(in); */
     //substitutionCypher(FILE* in, FILE* out, n)
     return EXIT_SUCCESS;
 }

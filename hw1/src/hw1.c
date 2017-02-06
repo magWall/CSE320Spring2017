@@ -11,7 +11,7 @@ int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 5
 int asciiToDecimal(char* ptr); //takes in char arr
 int findTutneseChar(char c);
 void emptyBuffer(); //reset buffer to null
-void  outputBuffer(FILE* out);//loop and  fputc buffer
+void outputBuffer(FILE* out);//loop and  fputc buffer
 char validargs(int argc, char** argv, FILE** in, FILE** out) {
 	char ret = 0;
 /*
@@ -173,14 +173,20 @@ void emptyBuffer()
 {
 	int i=0;
 	while(*(buffer+i) !=0)
+	{
 		*(buffer+i) =0;
+		i++;
+	}
 }
 //loop and  fputc buffer
 void  outputBuffer(FILE* out)
 {
 	int i=0;
 	while(*(buffer+i) !=0)
+	{
 		fputc(*(buffer+i),out);
+		i++;
+	}
 }
 void tutneseEncr(FILE* in, FILE* out)
 {
@@ -199,15 +205,15 @@ void tutneseEncr(FILE* in, FILE* out)
 					*(buffer+2) = 'u';
 					*(buffer+3) = 'a';
 					*(buffer+4) = 't';
-					*(buffer+5) = secondChar;
-					}
+					*(buffer+5) = (char)secondChar;
+				}
 				else //if capital letter but not vowel, consonant
 				{
 					*buffer = 'S';
 					*(buffer+1) = 'q';
 					*(buffer+2) = 'u';
 					*(buffer+3) = 'a';
-					*(buffer+4) = secondChar;
+					*(buffer+4) = (char)secondChar;
 				}
 					outputBuffer(out);
 					emptyBuffer();
@@ -221,20 +227,19 @@ void tutneseEncr(FILE* in, FILE* out)
 					*(buffer+2) = 'u';
 					*(buffer+3) = 'a';
 					*(buffer+4) = 't';
-					*(buffer+5) = secondChar;
-					}
+					*(buffer+5) = (char)secondChar;
+				}
 				else //if lower letter but not vowel, consonant
 				{
 					*buffer = 's';
 					*(buffer+1) = 'q';
 					*(buffer+2) = 'u';
 					*(buffer+3) = 'a';
-					*(buffer+4) = secondChar;
+					*(buffer+4) = (char)secondChar;
 				}
 					outputBuffer(out);
 					emptyBuffer();
 				//not capital, but is it a constant or a vowel?
-
 			}
 			//if is constant, AND if capital print Squa, else print squa
 			//else if vowel, AND if capital, print Squat, else prin squat
@@ -246,22 +251,24 @@ void tutneseEncr(FILE* in, FILE* out)
 		else //the two chars are different.
 		{
 
-			int tutPos = findTutneseChar(firstChar);
+			int tutPos = findTutneseChar((char)firstChar);
 			if(tutPos != -1)
 			{
 				if(firstChar >=65 && firstChar <=90)
 				{
-					char tutCharOne = **(Tutnese+tutPos);
+					char tutCharOne = **(Tutnese+tutPos); //change Tutnese case
 					if(tutCharOne>=97 && tutCharOne<=122) //if the first character of Tutnese is lowercase but firstChar is uppercase, change it
 						tutCharOne -= (char)32; //subtract 32 from the char to make it capitalize
 
 					*buffer = tutCharOne; //either was or now firstChar same case
-					*(buffer)=*(*(Tutnese+tutPos)); //capitalize uppercase of first char
 					int i=1;
 					while(*(*(Tutnese+tutPos)+i) !=0) //words arr = Tutnese, charArr = *Tutnese, **Tutnese = character
 					{
 						*(buffer+i)=*(*(Tutnese+tutPos)+i);//while char is not null, store char into buffer
+						i++;
 					}
+					outputBuffer(out);
+					emptyBuffer();
 				}
 				else	//else assume lowercase for all tutnese characters and char is lowercase
 				{
@@ -269,19 +276,23 @@ void tutneseEncr(FILE* in, FILE* out)
 					while(*(*(Tutnese+tutPos)+i) !=0) //words arr = Tutnese, charArr = *Tutnese, **Tutnese = character
 					{
 						*(buffer+i)=*(*(Tutnese+tutPos)+i);//while char is not null, store char into buffer
+						i++;
 					}
+					outputBuffer(out);
+					emptyBuffer();
 				}
 
 			}
 			else
 			{
-				fputc(firstChar, out); //basically outputBuffer except consonant or Char doesn't exist there and no substitute word is needed
+				fputc((char)firstChar, out); //basically outputBuffer except consonant or Char doesn't exist there and no substitute word is needed
 			}
 			//leave char 2 untouched
 			//check if  char matches string array list w/ findTutneseChar, if not -1 print matching string, else print char as is
 			firstChar = secondChar;
 			secondChar = getc(in);
 		}
+
 			}
 	//grab first and second char, if they are the same, do whatever you need to do
 	//else check first char and  loop to see if one of the characters fulfills the req
