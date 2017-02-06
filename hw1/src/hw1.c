@@ -10,7 +10,8 @@ char alphabetLowerToUpperCase(char lower);//converts lower to uppercase if it's 
 int isValidArg6(char* ptr); //checks char array to see all ascii betwene 48 to 57, 0 is false, 1 is true
 int asciiToDecimal(char* ptr); //takes in char arr
 int findTutneseChar(char c);
-void tutnese(FILE* in, FILE* out);
+void emptyBuffer(); //reset buffer to null
+void  outputBuffer(FILE* out);//loop and  fputc buffer
 char validargs(int argc, char** argv, FILE** in, FILE** out) {
 	char ret = 0;
 /*
@@ -167,15 +168,133 @@ int findAlphabet(char c)
 	}
 	return -1;
 }
-void tutnese(FILE* in, FILE* out)
+//reset buffer to null
+void emptyBuffer()
 {
-	int firstChar = getc(in);
+	int i=0;
+	while(*(buffer+i) !=0)
+		*(buffer+i) =0;
+}
+//loop and  fputc buffer
+void  outputBuffer(FILE* out)
+{
+	int i=0;
+	while(*(buffer+i) !=0)
+		fputc(*(buffer+i),out);
+}
+void tutneseEncr(FILE* in, FILE* out)
+{
+	int firstChar = getc(in);	//getc returns an int instead a char
+	int secondChar = getc(in);
+	while(firstChar != EOF)
+	{
+		if(firstChar == secondChar)		//if double
+		{
+			if(firstChar >=65 && firstChar <=90)//if capital letter
+			{
+				if(firstChar == 65 || firstChar == 73 || firstChar == 69 || firstChar == 79 ||firstChar == 85) //if vowel aeiou
+				{
+					*buffer = 'S';
+					*(buffer+1) = 'q';
+					*(buffer+2) = 'u';
+					*(buffer+3) = 'a';
+					*(buffer+4) = 't';
+					*(buffer+5) = secondChar;
+					}
+				else //if capital letter but not vowel, consonant
+				{
+					*buffer = 'S';
+					*(buffer+1) = 'q';
+					*(buffer+2) = 'u';
+					*(buffer+3) = 'a';
+					*(buffer+4) = secondChar;
+				}
+					outputBuffer(out);
+					emptyBuffer();
+			}
+			else
+			{
+				if(firstChar == 97 || firstChar == 101 || firstChar == 105 || firstChar == 111 ||firstChar == 117) //if vowel aeiou
+				{
+					*buffer = 's';
+					*(buffer+1) = 'q';
+					*(buffer+2) = 'u';
+					*(buffer+3) = 'a';
+					*(buffer+4) = 't';
+					*(buffer+5) = secondChar;
+					}
+				else //if lower letter but not vowel, consonant
+				{
+					*buffer = 's';
+					*(buffer+1) = 'q';
+					*(buffer+2) = 'u';
+					*(buffer+3) = 'a';
+					*(buffer+4) = secondChar;
+				}
+					outputBuffer(out);
+					emptyBuffer();
+				//not capital, but is it a constant or a vowel?
 
+			}
+			//if is constant, AND if capital print Squa, else print squa
+			//else if vowel, AND if capital, print Squat, else prin squat
+			//if second char is capital, print capital, else print lowercasse
+
+			firstChar = getc(in);
+			secondChar = getc(in);
+		}
+		else //the two chars are different.
+		{
+
+			int tutPos = findTutneseChar(firstChar);
+			if(tutPos != -1)
+			{
+				if(firstChar >=65 && firstChar <=90)
+				{
+					char tutCharOne = **(Tutnese+tutPos);
+					if(tutCharOne>=97 && tutCharOne<=122) //if the first character of Tutnese is lowercase but firstChar is uppercase, change it
+						tutCharOne -= (char)32; //subtract 32 from the char to make it capitalize
+
+					*buffer = tutCharOne; //either was or now firstChar same case
+					*(buffer)=*(*(Tutnese+tutPos)); //capitalize uppercase of first char
+					int i=1;
+					while(*(*(Tutnese+tutPos)+i) !=0) //words arr = Tutnese, charArr = *Tutnese, **Tutnese = character
+					{
+						*(buffer+i)=*(*(Tutnese+tutPos)+i);//while char is not null, store char into buffer
+					}
+				}
+				else	//else assume lowercase for all tutnese characters and char is lowercase
+				{
+					int i=0;
+					while(*(*(Tutnese+tutPos)+i) !=0) //words arr = Tutnese, charArr = *Tutnese, **Tutnese = character
+					{
+						*(buffer+i)=*(*(Tutnese+tutPos)+i);//while char is not null, store char into buffer
+					}
+				}
+
+			}
+			else
+			{
+				fputc(firstChar, out); //basically outputBuffer except consonant or Char doesn't exist there and no substitute word is needed
+			}
+			//leave char 2 untouched
+			//check if  char matches string array list w/ findTutneseChar, if not -1 print matching string, else print char as is
+			firstChar = secondChar;
+			secondChar = getc(in);
+		}
+			}
 	//grab first and second char, if they are the same, do whatever you need to do
 	//else check first char and  loop to see if one of the characters fulfills the req
 	//ignore vowels
+	fclose(in);
+	fclose(out);
 }
 
+void tutneseDecr(FILE* in, FILE* out)
+{
+	//hi
+	printf("not yet available");
+}
 //return -1 if fail to find char
 int findTutneseChar(char c)
 {
@@ -210,6 +329,7 @@ void shiftStringDecr(FILE* in, FILE* out, int n) //alphabet shift to right, stri
 		c = getc(in);
 	}
 	fclose(in);
+	fclose(out);
 }
 void shiftStringEncr(FILE* in, FILE* out, int n)   //assuming it's the alphabet array that should be shifted, and strings just  take char positions
 {
@@ -230,6 +350,7 @@ void shiftStringEncr(FILE* in, FILE* out, int n)   //assuming it's the alphabet 
 		c = getc(in);
 	}
 	fclose(in);
+	fclose(out);
 	//scan file or whatnot
 
 	//take the in ptr's address, loop and see if it's part of the alphabet, if it is , shift left by taking the position of that char in arr+n %alphabetsize

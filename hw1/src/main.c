@@ -1,4 +1,5 @@
 #include "hw1.h"
+#include "info.h"
 
 int main(int argc, char **argv) {
 
@@ -35,8 +36,16 @@ int main(int argc, char **argv) {
 	}
     else
     {
-    	//assuming validargs works perfectly, then the only last outcome can be  tut
+    	printf("tut\n");
+    	maskedBits = 0x20;
+		int encrDecr = (int)(data&maskedBits);
+	    if(encrDecr==32) //if Tut decr
+			tutneseDecr(in, out);
+		else
+			tutneseEncr(in, out);
+		//assuming validargs works perfectly, then the only last outcome can be  tut
     } /*
+
     int c = getc(in);
     while( c !=EOF)
     {

@@ -21,6 +21,8 @@ char validargs(int argc, char **argv, FILE **in, FILE **out);
 void shiftStringDecr(FILE* in, FILE* out, int n); //decryption
 void shiftStringEncr(FILE* in, FILE* out, int n); //encryption
 
+void tutneseDecr(FILE* in, FILE* out);
+void tutneseEncr(FILE* in, FILE* out);
 
 #define USAGE(retcode) do{                                                        \
 fprintf(stderr, "%s\n",                                                           \
