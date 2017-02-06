@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 		else
 			shiftStringEncr(in, out, n);
 
-		/* int i=0;
+		/* int i=0; macro but don't know how to do the string
 		 while(*(Alphabet+i) !=0)
 		 {
 		 	//if decrpyt, else encrypt and move n spaces

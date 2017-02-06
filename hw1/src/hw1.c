@@ -113,15 +113,28 @@ $ bin/hw1 -t -d infile outfile*/
 		*in = stdin;
 	}
 	else
+	{
 		*in = fopen( (*(argv+3)),"r"); //infile
+		if(*in == NULL)
+		{
+			ret =0;
+			return ret;
+		}
+	}
 
 	if( *(*(argv+4)) =='-')
 	{
 		*out = stdout;
 	}
 	else
+	{
 		*out = fopen( (*(argv+4)), "w");	//outfile
-
+		if(*out == NULL)
+		{
+			ret =0;
+			return ret;
+		}
+	}
 
 }
 else if(i==2 && *(*(argv+1))=='-' && *((*(argv+1))+1) =='h')
@@ -130,21 +143,6 @@ else if(i==2 && *(*(argv+1))=='-' && *((*(argv+1))+1) =='h')
 
 }
 else ret = 0;
-
-
-/*printf("File Pointer %p\n",(FILE)**in);*/
-
-
-
-
-	/*void* tmp_ptr = &argv;
-	int i;
-	for (i=0;i<argc;i++)
-	{
-		(void*)tmp_ptr++;
-		printf(tmp_ptr);
-	}*/
-	/* code here */
 
 	return ret;
 }
