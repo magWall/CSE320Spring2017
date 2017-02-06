@@ -1,5 +1,4 @@
 #include "hw1.h"
-//#include "info.h"
 
 int main(int argc, char **argv) {
 
@@ -33,6 +32,28 @@ int main(int argc, char **argv) {
 		else
 			shiftStringEncr(in, out, n);
 
+		/* int i=0;
+		 while(*(Alphabet+i) !=0)
+		 {
+		 	//if decrpyt, else encrypt and move n spaces
+		 	printf(stderr, )
+		 	i++;
+		 }
+		char* operation;
+		 char* inputFileName = (*(argv+3));
+		 char* outputFileName = (*(argv+4));
+		 if(*inputFileName == '-')
+		 	inputFileName ="stdin";
+		 if(*outputFileName == '-')
+		 	outputFileName ="stdout";
+			if (encrDecr ==32)
+				operation = "decryption";
+			else
+				operation = "encryption";
+		 if inputfile == '-', then stdin
+			if outputfile == '-' then stdout
+			*/
+		//INFO(shiftedAlpha,n,inputFileName, outputFileName,operation,STflag);
 	}
     else
     {

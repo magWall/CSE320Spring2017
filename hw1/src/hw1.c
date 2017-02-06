@@ -301,10 +301,35 @@ void tutneseEncr(FILE* in, FILE* out)
 	fclose(out);
 }
 
-void tutneseDecr(FILE* in, FILE* out)
+void tutneseDecr(FILE* in, FILE* out)//incomplete
 {
-	//hi
-	printf("not yet available");
+	int firstChar = getc(in);	//getc returns an int instead a char
+	while(firstChar != EOF)
+	{
+		//if((char)firstChar == 's' || (char)firstChar == 'S')//
+	//	{
+
+//		}
+//		else	//just pattern match , take first char and  see if it's in Tutnese arr
+//		{
+			int pos = findAlphabet((char)firstChar);
+			if(pos != -1)
+			{
+				int i=0;
+				while(*((Alphabet+pos)+i) !=0)
+				{
+					*(buffer+i)= *((Alphabet+pos)+i);
+					i++;
+				}
+
+			}
+			else
+			{
+				putc((char)firstChar, out);
+			}
+//		}
+		firstChar= getc(in);
+	}
 }
 //return -1 if fail to find char, all Tutnese chars are supposed to be lowercase, so parse string
 int findTutneseChar(char c)
