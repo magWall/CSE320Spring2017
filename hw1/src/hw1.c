@@ -299,17 +299,17 @@ void tutneseEncr(FILE* in, FILE* out)
 	fclose(out);
 }
 
-void tutneseDecr(FILE* in, FILE* out)//incomplete
-{
+void tutneseDecr(FILE* in, FILE* out)//incomplete, send help brain too tired for this
+{										//isn't there a high chance to fail if the input is invalid? EXIT_FAILURE?
 	int firstChar = getc(in);	//getc returns an int instead a char
 	while(firstChar != EOF)
 	{
-		//if((char)firstChar == 's' || (char)firstChar == 'S')//
-	//	{
-
-//		}
-//		else	//just pattern match , take first char and  see if it's in Tutnese arr
-//		{
+		if((char)firstChar == 's' || (char)firstChar == 'S')//
+		{
+			//check to see if Squa or Squat and then check to see if it's some other tutnese syllable
+		}
+		else	//just pattern match , take first char and  see if it's in Tutnese arr
+		{
 			int pos = findAlphabet((char)firstChar);
 			if(pos != -1)
 			{
@@ -318,14 +318,15 @@ void tutneseDecr(FILE* in, FILE* out)//incomplete
 				{
 					*(buffer+i)= *((Alphabet+pos)+i);
 					i++;
-				}
+				}//compare to see if the tutnese  characters are the same  compared to the buffered characters
+
 
 			}
-			else
+			else //special character, just print it out
 			{
 				putc((char)firstChar, out);
 			}
-//		}
+		}
 		firstChar= getc(in);
 	}
 }

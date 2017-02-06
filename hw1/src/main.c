@@ -61,6 +61,7 @@ int main(int argc, char **argv) {
 		int encrDecr = (int)(data&maskedBits);
 	    if(encrDecr==32) //if Tut decr
 			tutneseDecr(in, out);
+		//if tutneseDecr fails, EXIT_FAILURE?
 		else
 			tutneseEncr(in, out);
 		//assuming validargs works perfectly, then the only last outcome can be  tut
