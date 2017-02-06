@@ -1,7 +1,7 @@
 #ifndef INFO_H
 #define INFO_H
 #include "const.h"
-#define
+
 
 #ifdef DINFO
 #define INFO(shiftedAlphabet, n, inputfile,outputfile,operation,STfFlag) do
