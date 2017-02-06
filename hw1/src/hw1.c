@@ -194,7 +194,7 @@ void tutneseEncr(FILE* in, FILE* out)
 	int secondChar = getc(in);
 	while(firstChar != EOF)
 	{
-		if(firstChar == secondChar)		//if double
+		if((firstChar == secondChar) &&((firstChar >=65 && firstChar <=90)||(firstChar >=97 && firstChar <=122)) )		//if double
 		{
 			if(firstChar >=65 && firstChar <=90)//if capital letter
 			{
@@ -306,14 +306,17 @@ void tutneseDecr(FILE* in, FILE* out)
 	//hi
 	printf("not yet available");
 }
-//return -1 if fail to find char
+//return -1 if fail to find char, all Tutnese chars are supposed to be lowercase, so parse string
 int findTutneseChar(char c)
 {
+	char tmpC = c;
+	if(c>=65 && c<=90)
+		tmpC = c+32;//lowercase
 	int i =0;
 	while (*(Tutnese+i) != 0) //while char array not null, loop
 	{
 		char firstTutChar =  **(Tutnese+i); // take first char of string of string arr
-		if(firstTutChar == c)
+		if(firstTutChar == tmpC)
 			return i;
 		i++;
 	}
