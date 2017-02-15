@@ -30,23 +30,23 @@ void processDictionary(FILE* f){
         if((line[strlen(line)-2] != ' ' && line[strlen(line)-1] == '\n') || (line[strlen(line)-1] != ' ' && line[strlen(line)-1] != '\n'))
             strcat(line, " ");
 
-        while(*character != NULL)
+        while(*character != 0) //while character isn't null, NULL is treated as pointer so change it to 0 bcz 0= NULL
         {
             if(counter >= MAX_MISSPELLED_WORDS+1)
                 break;
             //if the character is a space, add the word in word_list and make word NULL.
             if(*character == ' ')
             {
-                *wdPtr = NULL;
+                *wdPtr = 0;     //word is done, end it by terminating it
                 wdPtr = word;
-                if(firstWord)
+                if(firstWord) //if not zero, then true
                 {
                     addWord(currWord, wdPtr);
                     dict->num_words++;
 
                     firstWord = 0;
                 }
-                else
+                else                                    //******may need to increment firstWord*****//
                 {
                     struct misspelled_word* currMisspelling;
                     if((currMisspelling = malloc(sizeof(struct misspelled_word))) == NULL)
