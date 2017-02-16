@@ -1,5 +1,5 @@
 #include "../include/hw2.h"
-#include <getopt.h>
+#include <unistd.h>
 char DEFAULT_DICT_FILE[]= "../rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
 FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
@@ -35,25 +35,26 @@ int main(int argc, char *argv[]){
     FILE* iFile = DEFAULT_INPUT; //only set this when there's no default inputs and outputs
     FILE* oFile = DEFAULT_OUTPUT;
 
- /*   int optChosen = 0;
-    while( (optChosen = getopt(argc, argv, "ho::i::d::An:")!= -1)       //two colons indicate optional, 1 is required argument
-    {
+    int optChosen = 0;
+    while( (optChosen = getopt(argc, argv, "ho:i:d:A:")) != -1)       //two colons indicate optional, 1 is required argument
+    {                                                                     //getopt == -1 when exhausted all args
         switch(optChosen){
-            case 'h': USAGE(0); //if help, print help, then exit
+            case 'h': USAGE(0);     //if help, print help, then exit
                 return EXIT_SUCCESS;
-            case 'o':
                 break;
-            case 'i':
+            case 'o': strcpy(args.output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
                 break;
-            case 'd';
+            case 'i': strcpy(args.input, optarg);
                 break;
-            case 'An':              //range of 0-5 mispellings
+            case 'd': strcpy(args.dictFile, optarg);
+                break;
+            case 'A':                        //range of 0-5 mispellings
                 break;
             default:
-            exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
-    }*/
+    }
     char opt = '\0';
 
     for(i = 1; i< argc; i++)
