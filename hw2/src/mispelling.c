@@ -1,4 +1,4 @@
-#include "mispelling.h"
+#include "../include/mispelling.h"
 
 char** gentypos(int n, char* word) {
 	srand(time(NULL));

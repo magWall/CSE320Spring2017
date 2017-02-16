@@ -1,4 +1,7 @@
-#include "hw2.h"
+#include "../include/hw2.h"
+char DEFAULT_DICT_FILE[]= "dictionary.txt";
+FILE* DEFAULT_INPUT= NULL;      //I hate this error
+FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
 
 int main(int argc, char *argv[]){
     DEFAULT_INPUT = stdin;
@@ -100,7 +103,7 @@ int main(int argc, char *argv[]){
         if((line[strlen(line)-1] != ' ') && (line[strlen(line)-1] != '\n'))
             strcat(line, " ");
         //replaces spaces within a line with new lines
-        while(*character != NULL)
+        while(*character != 0)
         {
             if(*character == ' ' || *character == '\n')
             {
@@ -114,7 +117,7 @@ int main(int argc, char *argv[]){
                 printf("%d", strlen(wdPtr)-strlen(punct));
                 */
 
-                *wdPtr = NULL;
+                *wdPtr = 0;
                 wdPtr = word;
 
                 processWord(wdPtr);

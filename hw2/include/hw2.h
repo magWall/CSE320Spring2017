@@ -1,3 +1,6 @@
+#ifndef HW2_H
+#define HW2_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,12 +23,9 @@
         "\t-An\tAutomatically add n (in range 0-5) random misspellings for any word not in the dictionary.\n" \
 } while (0);
 
-
-char DEFAULT_DICT_FILE[]= "dictionary.txt";
-FILE* DEFAULT_INPUT= stdin;
-FILE* DEFAULT_OUTPUT= stdout;
 struct dictionary* dict;
 struct misspelled_word* m_list;
+#endif
 
 struct Args{
     bool d;

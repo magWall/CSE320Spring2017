@@ -1,4 +1,4 @@
-#include "hw2.h"
+#include "../include/hw2.h"
 
 /* Great filename. */
 
@@ -21,7 +21,8 @@ void processDictionary(FILE* f){
         char* wdPtr = word;
         char line[MAX_SIZE];
         char* character = line;
-        char word_list[MAX_MISSPELLED_WORDS+1][MAX_SIZE];
+
+//        char word_list[MAX_MISSPELLED_WORDS+1][MAX_SIZE];      //COMMENTED OUT
         int counter = 0;
         int firstWord = 1;
 
@@ -38,7 +39,7 @@ void processDictionary(FILE* f){
             if(*character == ' ')
             {
                 *wdPtr = 0;     //word is done, end it by terminating it
-                wdPtr = word;
+                wdPtr = word;           //add word into word_list here
                 if(firstWord) //if not zero, then true
                 {
                     addWord(currWord, wdPtr);
@@ -90,7 +91,7 @@ void freeWords(struct dict_word* currWord){
     {
         freeWords(currWord);
 
-        int i;
+    //    int i;                                    COMMENTED OUT
         //free word
         printf("FREED %s\n", currWord->word);
         free(currWord);
@@ -116,13 +117,13 @@ void printWords(struct dict_word* currWord, FILE* f){
 
         for(i = 0; i<currWord->num_misspellings; i++)
         {
-            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,((currWord->misspelled)[i])->word);
+            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,((currWord->misspelled)[i])->word);   //number
             fwrite(line, strlen(line)+1, 1, f);
 
-            sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);
+            sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);      //should be boolean
             fwrite(line, strlen(line)+1, 1, f);
 
-            sprintf(line, "\t\tACTUAL WORD: %s\n", ((currWord->misspelled)[i])->correct_word);
+            sprintf(line, "\t\tACTUAL WORD: %s\n", ((currWord->misspelled)[i])->correct_word->word); //needs to point to char word
             fwrite(line, strlen(line)+1, 1, f);
 
             if(((currWord->misspelled)[i])->next->word != NULL)
@@ -160,7 +161,7 @@ void processWord(char* inputWord){
         if(conf == 'Y')
         {
             struct dict_word* newWord;
-            int counter = 0;
+            //int counter = 0;  COMMENTED OUT
 
             if((newWord = (struct dict_word*) malloc(sizeof(struct dict_word))) == NULL)
             {
@@ -222,7 +223,7 @@ bool foundMisspelledMatch(char* inputWord){
             listPtr->correct_word->misspelled_count++;
             return true;
         }
-        listPtr = listPtr--->next;
+        listPtr = listPtr->next; //---> is not right, it's ->
     }
     return false;
 }
