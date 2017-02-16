@@ -1,5 +1,6 @@
 #include "../include/hw2.h"
-char DEFAULT_DICT_FILE[]= "dictionary.txt";
+#include <getopt.h>
+char DEFAULT_DICT_FILE[]= "../rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
 FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
 
@@ -31,10 +32,30 @@ int main(int argc, char *argv[]){
     char line[MAX_SIZE];
     //Declare Files
     FILE* dFile;
-    FILE* iFile = DEFAULT_INPUT;
+    FILE* iFile = DEFAULT_INPUT; //only set this when there's no default inputs and outputs
     FILE* oFile = DEFAULT_OUTPUT;
 
+ /*   int optChosen = 0;
+    while( (optChosen = getopt(argc, argv, "ho::i::d::An:")!= -1)       //two colons indicate optional, 1 is required argument
+    {
+        switch(optChosen){
+            case 'h': USAGE(0); //if help, print help, then exit
+                return EXIT_SUCCESS;
+            case 'o':
+                break;
+            case 'i':
+                break;
+            case 'd';
+                break;
+            case 'An':              //range of 0-5 mispellings
+                break;
+            default:
+            exit(EXIT_FAILURE);
+        }
+
+    }*/
     char opt = '\0';
+
     for(i = 1; i< argc; i++)
     {
         char* currArg = argv[i];
