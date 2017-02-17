@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
     FILE* dNewFile = NULL; //make a new dictFile if An is valid and we can add new words
     int optChosen = 0;
     int numMispellings =0; //check An, An will be 0  unless otherwise stated
-    while( (optChosen = getopt(argc, argv, "ho:i:d:A:")) != -1)       //two colons indicate optional, 1 is required argument
+    while( (optChosen = getopt(argc, argv, "ho:i:d:A::")) != -1)       //two colons indicate optional, 1 is required argument
     {
         opterr=0;                                 //getopt == -1 when exhausted all args, opterr = 0 to stop all error messages from appearing
         switch(optChosen){
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
                         args->i = true;
                         iFile = fopen(optarg, "r");
                 break;
-            case 'd': strcpy(args->dictFile, optarg); //take a new input or just use default dictionary
+            case 'd': strcpy(args->dictFile, optarg); //take a new input or just use default dictionaryarg
                         args->d = true;
                 break;
             case 'A': if(*optarg == 0 || *optarg == ' ')
@@ -134,12 +134,14 @@ int main(int argc, char *argv[]){
         if((line[strlen(line)-1] != ' ') && (line[strlen(line)-1] != '\n'))
             strcat(line, " ");
         //replaces spaces within a line with new lines
+
+        *character = tolower(*character); //convert all characters to lowercase
         while(*character != 0)
         {
             if(*character == ' ' || *character == '\n')
             {
                 char* punct = wdPtr-1;
-                    printf("char:%c",*punct);//dereferenced this to print char
+     //               printf("char:%c",*punct);//dereferenced this to print char
                 while(!((*punct>='a' && *punct<='z') || (*punct>='A' && *punct<='Z')))
                 {
                     punct--;
@@ -148,7 +150,7 @@ int main(int argc, char *argv[]){
                 printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
 
 
-                *wdPtr = 0;             //trying to reset the value ?
+                *wdPtr = 0;             //set terminator here to end string
                 wdPtr = word;
 
                 processWord(wdPtr, numMispellings);
@@ -185,7 +187,8 @@ int main(int argc, char *argv[]){
     free(dict);
     //free m_list
     free(m_list);
-
+    if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
+        fclose(dNewFile);
     fclose(dFile);
     fclose(iFile);
     fclose(oFile);

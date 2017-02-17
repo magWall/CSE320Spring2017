@@ -1,4 +1,5 @@
 #include "../include/hw2.h"
+#include "../include/mispelling.h"
 
 /* Great filename. */
 
@@ -31,6 +32,7 @@ void processDictionary(FILE* f){
         if((line[strlen(line)-2] != ' ' && line[strlen(line)-1] == '\n') || (line[strlen(line)-1] != ' ' && line[strlen(line)-1] != '\n'))
             strcat(line, " ");      //I feel like this is more convoluted than it needs to be...*SELF NOTE TO CHECK THIS STATEMENT*
 
+        *character = tolower(*character);
         while(*character != 0) //while character isn't null, NULL is treated as pointer so change it to 0 bcz 0= NULL
         {
             if(counter >= MAX_MISSPELLED_WORDS+1) //only take up to 5, don't break at 5
@@ -172,6 +174,8 @@ void processWord(char* inputWord, int numMisspellings){
 
             addWord(newWord, inputWord);
             dict->word_list = newWord;
+            dict->num_words++;//increment
+
             //remove user based input, only add if An is passed
          /*   printf("Added \"%s\" to Dictionary. Add misspellings (Y/N)? ", inputWord);
 
@@ -195,23 +199,26 @@ void processWord(char* inputWord, int numMisspellings){
                 {
                     char word[WORDLENGTH];
                     char* wdPtr = word;*/
-                    struct misspelled_word* newMWord;
-
-                    if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
+                    if(numMisspellings !=0)
                     {
-                        printf("ERROR: OUT OF MEMORY.");
-                        return;
-                    }
-   //                 printf("Enter misspelling: ");
-   //                 scanf("%s", word); puts next input into scanf
-                    int i=0;
-                    char** wdPtr = gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
-                     while(*wdPtr+i != NULL)                                //an array of misspelling strings
-                     {
-                        addMisspelledWord(newMWord, newWord, (*wdPtr+i));
-                        printf("Misspelling added\n");
-                        i++;
-                      }
+                        struct misspelled_word* newMWord;
+
+                        if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
+                        {
+                            printf("ERROR: OUT OF MEMORY.");
+                            return;
+                        }
+       //                 printf("Enter misspelling: ");
+       //                 scanf("%s", word); puts next input into scanf
+                        int i=0;
+                        char** wdPtr =gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
+                         while(*wdPtr+i != NULL)                                //an array of misspelling strings
+                         {
+                            addMisspelledWord(newMWord, newWord, (*wdPtr+i));
+                            printf("Misspelling added\n");
+                            i++;
+                          }
+                     }
 //                    while ((ch = getchar()) != '\n' && ch != EOF);
                 //    numMisspellings--;
                // }

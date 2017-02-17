@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 //#include "hw2.h"
 
 #define MAX_SIZE 256
