@@ -158,13 +158,13 @@ int main(int argc, char *argv[]){
     }*/
 
     strcpy(line,"\n--------INPUT FILE WORDS--------\n");
-    fwrite(line, strlen(line)+1, 1, oFile);
+    fwrite(line, strlen(line)+1, 1, oFile);         //writes INPUT FILE WORDS or whatever to the outputFile
 
-    while(!feof(iFile))
+    while(!feof(iFile))                             //if !endofINPUTFILE
     {
         char word[MAX_SIZE];
         char* wdPtr = word;
-        //char line[MAX_SIZE];
+        char line[MAX_SIZE];        //uncommented out
         char* character = line;
 
         fgets(line, MAX_SIZE+1, iFile);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]){
                 printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
 
 
-                *wdPtr = 0;
+                *wdPtr = 0;             //trying to reset the value ?
                 wdPtr = word;
 
                 processWord(wdPtr);

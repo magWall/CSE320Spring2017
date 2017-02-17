@@ -89,7 +89,7 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
 void freeWords(struct dict_word* currWord){
     if(currWord != NULL)
     {
-        freeWords(currWord);
+        freeWords(currWord->next); //loop and free all the words in the linkedlist
 
     //    int i;                                    COMMENTED OUT
         //free word
