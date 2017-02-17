@@ -94,9 +94,8 @@ int main(int argc, char *argv[]){
     }
     else
     {
-        processDictionary(dFile);
-    }     //   processDictionary(dFile);
-
+        processDictionary(dFile); //sets up dictionary
+    }
 
 
     // Make a loop index

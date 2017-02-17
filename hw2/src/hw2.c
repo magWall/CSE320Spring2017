@@ -17,7 +17,7 @@ void processDictionary(FILE* f){
         currWord->misspelled_count = 0;
 
         //variables
-        char word[MAX_SIZE];
+        char word[WORDLENGTH]; //WORDLENGTH VS MAX_SIZE, other instances made it WORDLENGTH, change it to wordlength
         char* wdPtr = word;
         char line[MAX_SIZE];
         char* character = line;
@@ -33,12 +33,12 @@ void processDictionary(FILE* f){
 
         while(*character != 0) //while character isn't null, NULL is treated as pointer so change it to 0 bcz 0= NULL
         {
-            if(counter >= MAX_MISSPELLED_WORDS+1)
+            if(counter >= MAX_MISSPELLED_WORDS+1) //only take up to 5, don't break at 5
                 break;
             //if the character is a space, add the word in word_list and make word NULL.
             if(*character == ' ')
             {
-                *wdPtr = 0;     //word is done, end it by terminating it
+                *wdPtr = 0;     //word is done, end it by terminating it **** check****
                 wdPtr = word;           //add word into word_list here
                 if(firstWord) //if not zero, then true
                 {
@@ -47,7 +47,7 @@ void processDictionary(FILE* f){
 
                     firstWord = 0;
                 }
-                else                                    //******may need to increment firstWord*****//
+                else                                    //**** only the first word is the correct spelling, the rest is the counter ****///
                 {
                     struct misspelled_word* currMisspelling;
                     if((currMisspelling = malloc(sizeof(struct misspelled_word))) == NULL)
@@ -57,11 +57,12 @@ void processDictionary(FILE* f){
                     }
 
                     addMisspelledWord(currMisspelling, currWord, wdPtr);
+                    counter++; //needs to increment somehow...
                 }
             }
             //if the character isn't a space or a new line, add the character to word.
             else if(*character != '\n')
-                *(wdPtr++) = *character;
+                *(wdPtr++) = *character; //adds letter to wordPtr, then increment
             character++;
         }
     }
@@ -82,7 +83,7 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
     misspelledWord->misspelled = 0;
     misspelledWord->correct_word = correctWord;
     misspelledWord->next = m_list;
-    (correctWord->misspelled)[++correctWord->num_misspellings] = misspelledWord;
+    (correctWord->misspelled)[++correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
     m_list = misspelledWord;
 }
 
