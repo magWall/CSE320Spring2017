@@ -39,7 +39,7 @@ void processDictionary(FILE* f){
             if(*character == ' ')
             {
                 *wdPtr = 0;     //word is done, end it by terminating it **** check****
-                wdPtr = word;           //add word into word_list here
+                wdPtr = word;   //reset pointer to beginning of address
                 if(firstWord) //if not zero, then true
                 {
                     addWord(currWord, wdPtr);

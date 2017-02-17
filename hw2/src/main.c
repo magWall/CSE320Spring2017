@@ -207,7 +207,7 @@ int main(int argc, char *argv[]){
 
     strcpy(line, "\n--------DICTIONARY WORDS--------\n");
     fwrite(line, strlen(line)+1, 1, oFile);
-    printWords(dict->word_list , oFile);
+    printWords(dict->word_list , stderr); //print it to  stderr as stats
 
     //printf("\n--------FREED WORDS--------\n");
     freeWords(dict->word_list);
