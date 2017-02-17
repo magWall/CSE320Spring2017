@@ -21,16 +21,21 @@ int main(int argc, char *argv[]){
     }
     m_list = NULL;
 
-    struct Args args;
+    struct Args* args;  //change all . into -> by making it a pointer
+    if( (args = (struct Args*) malloc(sizeof(struct Args))) == NULL)
+    {
+        printf("ERROR: OUT OF MEMORY.\n");
+        return EXIT_FAILURE;
+    }
     // Set struct default values
-    args.d = false;
-    args.i = false;
-    args.o = false;
-    strcpy(args.dictFile, DEFAULT_DICT_FILE);
+    args->d = false;
+    args->i = false;
+    args->o = false;
+    strcpy(args->dictFile, DEFAULT_DICT_FILE);
 
     char line[MAX_SIZE];
     //Declare Files
-    FILE* dFile;
+    FILE* dFile = NULL; //set this to null
     FILE* iFile = NULL; //only set this when there's no default inputs and outputs
     FILE* oFile = NULL;   //put this at the bottom and check after if args.input is null or something
 
@@ -41,17 +46,17 @@ int main(int argc, char *argv[]){
         switch(optChosen){
             case 'h': USAGE(EXIT_SUCCESS);     //if help, print help, then exit
                 return EXIT_SUCCESS;
-                break;
-            case 'o': strcpy(args.output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
-                        args.o = true;
+                break;      //may not be needed
+            case 'o': strcpy(args->output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
+                        args->o = true;
                         oFile = fopen(optarg, "w");
                 break;
-            case 'i': strcpy(args.input, optarg);
-                        args.i = true;
+            case 'i': strcpy(args->input, optarg);
+                        args->i = true;
                         iFile = fopen(optarg, "r");
                 break;
-            case 'd': strcpy(args.dictFile, optarg); //take a new input or just use default dictionary
-                        args.d = true;
+            case 'd': strcpy(args->dictFile, optarg); //take a new input or just use default dictionary
+                        args->d = true;
                 break;
             case 'A': numMispellings = atoi(optarg);
             if( numMispellings>5 || numMispellings<0)
@@ -66,31 +71,34 @@ int main(int argc, char *argv[]){
         }
 
     }
-    dFile = fopen(args.dictFile, "r");
+    dFile = fopen(args->dictFile, "r");
 
-    if(iFile == NULL && args.i == true)
+    if(iFile == NULL && args->i == true)
     {
-        printf("Unable to open: %s.\n", args.input);
+        printf("Unable to open: %s.\n", args->input);
         return EXIT_FAILURE;
     }
-        else if(args.i == false)
+        else if(args->i == false)
             iFile = DEFAULT_INPUT;
-    if(oFile == NULL && args.o == true)
+    if(oFile == NULL && args->o == true)
     {
-        printf("Unable to open: %s.\n", args.output);
+        printf("Unable to open: %s.\n", args->output);
         return EXIT_FAILURE;
     }
-        else if(args.o == false)
+        else if(args->o == false)
             oFile = DEFAULT_OUTPUT;
-    if(dFile == NULL)
+ /*   if(dFile == NULL)
     {
-        printf("Unable to open: %s.\n", args.dictFile);
+        printf("Unable to open: %s.\n", args->dictFile);
     }
     else
     {
+        //processDictionary(dFile);
+    }
+    */
         processDictionary(dFile);
 
-    }
+
 
     // Make a loop index
     //    int i;
