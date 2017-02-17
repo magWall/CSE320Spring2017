@@ -1,6 +1,6 @@
 #include "../include/hw2.h"
 #include <unistd.h>
-char DEFAULT_DICT_FILE[]= "../rsrc/dictionary.txt"; //default should be rsrc dictionary directory
+char DEFAULT_DICT_FILE[]= "./rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
 FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
 
@@ -87,16 +87,14 @@ int main(int argc, char *argv[]){
     }
         else if(args->o == false)
             oFile = DEFAULT_OUTPUT;
- /*   if(dFile == NULL)
+    if(dFile == NULL)
     {
         printf("Unable to open: %s.\n", args->dictFile);
     }
     else
     {
-        //processDictionary(dFile);
-    }
-    */
         processDictionary(dFile);
+    }     //   processDictionary(dFile);
 
 
 
