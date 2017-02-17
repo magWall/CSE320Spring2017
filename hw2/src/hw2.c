@@ -29,7 +29,7 @@ void processDictionary(FILE* f){
         fgets(line, MAX_SIZE+1, f);
         //if there isn't a space at the end of the line, put one there
         if((line[strlen(line)-2] != ' ' && line[strlen(line)-1] == '\n') || (line[strlen(line)-1] != ' ' && line[strlen(line)-1] != '\n'))
-            strcat(line, " ");
+            strcat(line, " ");      //I feel like this is more convoluted than it needs to be...*SELF NOTE TO CHECK THIS STATEMENT*
 
         while(*character != 0) //while character isn't null, NULL is treated as pointer so change it to 0 bcz 0= NULL
         {

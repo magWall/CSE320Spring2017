@@ -27,35 +27,76 @@ int main(int argc, char *argv[]){
     args.i = false;
     args.o = false;
     strcpy(args.dictFile, DEFAULT_DICT_FILE);
-    // Make a loop index
-    int i;
+
     char line[MAX_SIZE];
     //Declare Files
     FILE* dFile;
-    FILE* iFile = DEFAULT_INPUT; //only set this when there's no default inputs and outputs
-    FILE* oFile = DEFAULT_OUTPUT;
+    FILE* iFile = NULL; //only set this when there's no default inputs and outputs
+    FILE* oFile = NULL;   //put this at the bottom and check after if args.input is null or something
 
     int optChosen = 0;
+    int numMispellings =-1; //check An
     while( (optChosen = getopt(argc, argv, "ho:i:d:A:")) != -1)       //two colons indicate optional, 1 is required argument
     {                                                                     //getopt == -1 when exhausted all args
         switch(optChosen){
-            case 'h': USAGE(0);     //if help, print help, then exit
+            case 'h': USAGE(EXIT_SUCCESS);     //if help, print help, then exit
                 return EXIT_SUCCESS;
                 break;
             case 'o': strcpy(args.output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
+                        args.o = true;
+                        oFile = fopen(optarg, "w");
                 break;
             case 'i': strcpy(args.input, optarg);
+                        args.i = true;
+                        iFile = fopen(optarg, "r");
                 break;
-            case 'd': strcpy(args.dictFile, optarg);
+            case 'd': strcpy(args.dictFile, optarg); //take a new input or just use default dictionary
+                        args.d = true;
                 break;
-            case 'A':                        //range of 0-5 mispellings
+            case 'A': numMispellings = atoi(optarg);
+            if( numMispellings>5 || numMispellings<0)
+                {
+                    USAGE(EXIT_FAILURE);
+                    return (EXIT_FAILURE);
+                }                           //range of 0-5 mispellings
                 break;
             default:
-                exit(EXIT_FAILURE);
+                USAGE(EXIT_FAILURE);
+                return (EXIT_FAILURE);
         }
 
     }
-    char opt = '\0';
+    dFile = fopen(args.dictFile, "r");
+
+    if(iFile == NULL && args.i == true)
+    {
+        printf("Unable to open: %s.\n", args.input);
+        return EXIT_FAILURE;
+    }
+        else if(args.i == false)
+            iFile = DEFAULT_INPUT;
+    if(oFile == NULL && args.o == true)
+    {
+        printf("Unable to open: %s.\n", args.output);
+        return EXIT_FAILURE;
+    }
+        else if(args.o == false)
+            oFile = DEFAULT_OUTPUT;
+    if(dFile == NULL)
+    {
+        printf("Unable to open: %s.\n", args.dictFile);
+    }
+    else
+    {
+        processDictionary(dFile);
+
+    }
+
+    // Make a loop index
+    //    int i;
+
+    //use bottom code as reference
+    /*    char opt = '\0';
 
     for(i = 1; i< argc; i++)
     {
@@ -107,7 +148,7 @@ int main(int argc, char *argv[]){
     {
         processDictionary(dFile);
 
-    }
+    }*/
 
     strcpy(line,"\n--------INPUT FILE WORDS--------\n");
     fwrite(line, strlen(line)+1, 1, oFile);
