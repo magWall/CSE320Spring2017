@@ -42,7 +42,8 @@ int main(int argc, char *argv[]){
     int optChosen = 0;
     int numMispellings =0; //check An, An will be 0  unless otherwise stated
     while( (optChosen = getopt(argc, argv, "ho:i:d:A:")) != -1)       //two colons indicate optional, 1 is required argument
-    {                                                                     //getopt == -1 when exhausted all args
+    {
+        opterr=0;                                 //getopt == -1 when exhausted all args, opterr = 0 to stop all error messages from appearing
         switch(optChosen){
             case 'h': USAGE(EXIT_SUCCESS);     //if help, print help, then exit
                 return EXIT_SUCCESS;
