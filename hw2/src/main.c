@@ -76,21 +76,26 @@ int main(int argc, char *argv[]){
 
     if(iFile == NULL && args->i == true)
     {
-        printf("Unable to open: %s.\n", args->input);
+        //printf("Unable to open: %s.\n", args->input);
+        USAGE(EXIT_FAILURE);
         return EXIT_FAILURE;
     }
         else if(args->i == false)
             iFile = DEFAULT_INPUT;
     if(oFile == NULL && args->o == true)
     {
-        printf("Unable to open: %s.\n", args->output);
+        //printf("Unable to open: %s.\n", args->output);
+        USAGE(EXIT_FAILURE);
         return EXIT_FAILURE;
     }
         else if(args->o == false)
             oFile = DEFAULT_OUTPUT;
     if(dFile == NULL)
     {
-        printf("Unable to open: %s.\n", args->dictFile);
+        //printf("Unable to open: %s.\n", args->dictFile);
+        USAGE(EXIT_FAILURE);
+        return EXIT_FAILURE; /*THIS SHOULD NOT HAPPEN BECAUSE
+         DEFAULT FILE EXISTS BUT SAFETY PRECAUTION */
     }
     else
     {
