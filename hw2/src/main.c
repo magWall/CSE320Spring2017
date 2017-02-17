@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
     FILE* oFile = NULL;   //put this at the bottom and check after if args.input is null or something
 
     int optChosen = 0;
-    int numMispellings =-1; //check An
+    int numMispellings =0; //check An, An will be 0  unless otherwise stated
     while( (optChosen = getopt(argc, argv, "ho:i:d:A:")) != -1)       //two colons indicate optional, 1 is required argument
     {                                                                     //getopt == -1 when exhausted all args
         switch(optChosen){
@@ -170,15 +170,15 @@ int main(int argc, char *argv[]){
         {
             if(*character == ' ' || *character == '\n')
             {
-                /*char* punct = wdPtr-1;
-                    printf("char:%c",punct);
+                char* punct = wdPtr-1;
+                    printf("char:%c",*punct);//dereferenced this to print char
                 while(!((*punct>='a' && *punct<='z') || (*punct>='A' && *punct<='Z')))
                 {
                     punct--;
                 }
                 punct++;
-                printf("%d", strlen(wdPtr)-strlen(punct));
-                */
+                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
+
 
                 *wdPtr = 0;
                 wdPtr = word;
