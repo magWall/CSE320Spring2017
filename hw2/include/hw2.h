@@ -31,6 +31,7 @@ struct Args{
     bool d;
     bool i;
     bool o;
+    bool aFlag;
 
     char dictFile[MAX_SIZE];
     char input[MAX_SIZE];
@@ -111,7 +112,7 @@ void printWords(struct dict_word* word, FILE* f);
  *
  * @param      inputWord  The input word
  */
-void processWord(char* inputWord);
+void processWord(char* inputWord, int numMisspellings);
 
 
 
