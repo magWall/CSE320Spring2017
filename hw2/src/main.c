@@ -179,10 +179,16 @@ int main(int argc, char *argv[]){
     }
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
     {
-        char* newDictSrc =  strcat(strcat(dirname(args->dictFile), "/new_"),basename(args->dictFile));
+
+        debug("dirname:%s,basename:%s\n",dirname(args->dictFile),basename(args->dictFile));
+        debug("concat:%s",strcat(basename(args->dictFile),dirname(args->dictFile)));
+        char newDictSrc[MAX_SIZE];
+        strcat(newDictSrc,dirname(args->dictFile));
+        strcat(newDictSrc, "/new_");
+        strcat(newDictSrc,basename(args->dictFile));
+        debug("%s\n",newDictSrc);
         dNewFile = fopen(newDictSrc,"w");
-//        printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
-//printWords causing segfaults
+   //     printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
     }
     fprintf(stderr, "Total number of words in dictionary: %d\n"
                     "Size of dictionary (in bytes): %d\n"
@@ -199,7 +205,7 @@ int main(int argc, char *argv[]){
        ************************
 
     */
-    printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
+  //  printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
         fclose(dNewFile);
     freeSpace(args);

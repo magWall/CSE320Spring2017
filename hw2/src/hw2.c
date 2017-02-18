@@ -94,7 +94,11 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
     misspelledWord->next = m_list;
    // debug("m_list's curr word:%s\n", m_list->word);
     //debug("misspelledWord->word %s,->next %s\n",misspelledWord->word,misspelledWord->next->word);
-    (correctWord->misspelled)[++correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
+
+    (correctWord->misspelled)[correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
+    debug("correctword:%s,num_mispellings %d\n",correctWord->word,correctWord->num_misspellings);
+    debug("correctword's mispelled[%d],%s\n",correctWord->num_misspellings,correctWord->misspelled[correctWord->num_misspellings]->word);
+    ++correctWord->num_misspellings;
     m_list = misspelledWord;
 }
 
@@ -138,7 +142,8 @@ void printWords(struct dict_word* currWord, FILE* f){
 
         for(i = 0; i<currWord->num_misspellings; i++)
         {
-            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,((currWord->misspelled)[i])->word);   //number
+            debug("goes into here %d\n",i);
+            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,currWord->misspelled[i]->word);   //number
             fwrite(line, strlen(line)+1, 1, f);
 
             sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);      //should be each individual word
