@@ -100,6 +100,15 @@ void freeWords(struct dict_word* currWord){
         free(currWord);
     }
 }
+int totalMisspellings(struct dict_word* currWord){
+
+    if(currWord != NULL)
+    {
+        return currWord->num_misspellings+ totalMisspellings(currWord->next);
+        //loop and free all the words in the linkedlist
+    }
+    return 0;
+}
 
 void printWords(struct dict_word* currWord, FILE* f){
     if(currWord != NULL)
@@ -123,7 +132,7 @@ void printWords(struct dict_word* currWord, FILE* f){
             sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,((currWord->misspelled)[i])->word);   //number
             fwrite(line, strlen(line)+1, 1, f);
 
-            sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);      //should be boolean
+            sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);      //should be each individual word
             fwrite(line, strlen(line)+1, 1, f);
 
             sprintf(line, "\t\tACTUAL WORD: %s\n", ((currWord->misspelled)[i])->correct_word->word); //needs to point to char word

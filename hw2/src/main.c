@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
                     punct--;
                 }
                 punct++;
-                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
+//                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
 
 
                 *wdPtr = 0;             //set terminator here to end string
@@ -178,8 +178,19 @@ int main(int argc, char *argv[]){
 
     strcpy(line, "\n--------DICTIONARY WORDS--------\n");
     fwrite(line, strlen(line)+1, 1, oFile);
+    //print stats
+    fprintf(stderr, "Total number of words in dictionary: %d\n"
+                    "Size of dictionary (in bytes): %d\n"
+                    "Total number of misspelled words: %d\n"
+                    "Top 3 misspelled words:\n", dict->num_words,
+                    (int)(sizeof(struct dictionary) + sizeof(struct dict_word) * dict->num_words),
+                    totalMisspellings(dict->word_list));
+    //remember to add top 3 misspelled words here
+    /* *******
+       ************************
+
+    */
     printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
-    printWords(dict->word_list , stderr); //print it to  stderr as stats
 
     //printf("\n--------FREED WORDS--------\n");
     freeWords(dict->word_list);

@@ -46,7 +46,7 @@ struct dictionary{
 
 struct dict_word{
     char word[WORDLENGTH];
-    int misspelled_count; // initialize to 0
+    int misspelled_count; // initialimakeze to 0
     int num_misspellings; // initialize to 0
     struct misspelled_word* misspelled[MAX_MISSPELLED_WORDS];
     struct dict_word* next;
@@ -58,6 +58,7 @@ struct misspelled_word{
     struct dict_word* correct_word;
     struct misspelled_word* next;
 };
+int totalMisspellings(struct dict_word* currWord);
 
 
 
