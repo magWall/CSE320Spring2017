@@ -208,8 +208,10 @@ void processWord(char* inputWord, int numMisspellings){
                 {
                     char word[WORDLENGTH];
                     char* wdPtr = word;*/
+                    int i=0;
                     if(numMisspellings !=0)
                     {
+                        char** wdPtr =gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
                         struct misspelled_word* newMWord;
 
                         if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
@@ -217,13 +219,12 @@ void processWord(char* inputWord, int numMisspellings){
                             printf("ERROR: OUT OF MEMORY.");
                             return;
                         }
+
        //                 printf("Enter misspelling: ");
        //                 scanf("%s", word); puts next input into scanf
-                        int i=0;
-                        char** wdPtr =gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
-                         while(*wdPtr+i != NULL)                                //an array of misspelling strings
+                         while(i<numMisspellings)                                //an array of misspelling strings
                          {
-                            addMisspelledWord(newMWord, newWord, (*wdPtr+i));
+                            addMisspelledWord(newMWord, newWord, *(wdPtr+i));
                             printf("Misspelling added\n");
                             i++;
                           }

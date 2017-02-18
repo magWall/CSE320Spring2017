@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
             case 'd': strcpy(args->dictFile, optarg); //take a new input or just use default dictionaryarg
                         args->d = true;
                 break;
-            case 'A': if(*optarg == 0 || *optarg == ' ')
+            case 'A': if(optarg == 0 || *optarg == ' ')
             {
                 USAGE(EXIT_FAILURE);
                 return (EXIT_FAILURE);
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]){
     {
         char* newDictSrc =  strcat(strcat(dirname(args->dictFile), "/new_"),basename(args->dictFile));
         dNewFile = fopen(newDictSrc,"w");
-        printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
+  //      printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
 
     }
 
