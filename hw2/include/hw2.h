@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "../include/mispelling.h"
 //#include "hw2.h"
 
 #define MAX_SIZE 256
@@ -96,7 +97,7 @@ void addMisspelledWord(struct misspelled_word * misspelledWord, struct dict_word
  * @param      word  The word
  */
 void freeWords(struct dict_word* word);
-
+void freeSpace(struct Args* args);
 
 
 /**

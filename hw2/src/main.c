@@ -19,6 +19,7 @@ int main(int argc, char *argv[]){
     if((m_list = (struct misspelled_word*) malloc(sizeof(struct misspelled_word*))) == NULL)
     {
         printf("ERROR: OUT OF MEMORY.\n");
+        free(dict);
         return EXIT_FAILURE;
     }
     m_list = NULL;
@@ -27,6 +28,8 @@ int main(int argc, char *argv[]){
     if( (args = (struct Args*) malloc(sizeof(struct Args))) == NULL)
     {
         printf("ERROR: OUT OF MEMORY.\n");
+        free(dict);
+        free(m_list);
         return EXIT_FAILURE;
     }
     // Set struct default values
@@ -193,15 +196,9 @@ int main(int argc, char *argv[]){
 
     */
     printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
-
-    //printf("\n--------FREED WORDS--------\n");
-    freeWords(dict->word_list);
-    //free dictionary
-    free(dict);
-    //free m_list
-    free(m_list);
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
         fclose(dNewFile);
+    freeSpace(args);
     fclose(dFile);
     fclose(iFile);
     fclose(oFile);

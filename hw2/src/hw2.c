@@ -244,7 +244,16 @@ void processWord(char* inputWord, int numMisspellings){
         //}
     }
 }
-
+void freeSpace(struct Args* args)
+{
+    //printf("\n--------FREED WORDS--------\n");
+    free(args);
+    freeWords(dict->word_list);
+    //free dictionary
+    free(dict);
+    //free m_list
+    free(m_list);
+}
 bool foundMisspelledMatch(char* inputWord){
     struct misspelled_word* listPtr = m_list;
     while(listPtr != NULL)
