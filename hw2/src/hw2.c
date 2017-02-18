@@ -1,6 +1,6 @@
 #include "../include/hw2.h"
 #include "../include/mispelling.h"
-#include <debug.h>
+#include "../include/debug.h"
 /* Great filename. */
 
 void processDictionary(FILE* f){
@@ -109,7 +109,18 @@ void freeWords(struct dict_word* currWord){
 
     //    int i;                                    COMMENTED OUT
         //free word
-        printf("FREED %s\n", currWord->word);
+    //    printf("FREED %s\n", currWord->word);
+        free(currWord);
+    }
+}
+void freeMWords(struct misspelled_word* currWord){
+    if(currWord != NULL)
+    {
+        freeMWords(currWord->next); //loop and free all the words in the linkedlist
+
+    //    int i;                                    COMMENTED OUT
+        //free word
+    //    printf("FREED %s\n", currWord->word);
         free(currWord);
     }
 }
@@ -285,6 +296,7 @@ void freeSpace(struct Args* args)
     //printf("\n--------FREED WORDS--------\n");
     free(args);
     freeWords(dict->word_list);
+    freeMWords(m_list);
     //free dictionary
     free(dict);
     //free m_list

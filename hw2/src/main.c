@@ -1,7 +1,7 @@
 #include "../include/hw2.h"
 #include <unistd.h>
 #include <libgen.h>
-#include <debug.h>
+#include "../include/debug.h"
 
 char DEFAULT_DICT_FILE[]= "./rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
