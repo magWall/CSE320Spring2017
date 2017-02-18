@@ -97,7 +97,10 @@ void addMisspelledWord(struct misspelled_word * misspelledWord, struct dict_word
  * @param      word  The word
  */
 void freeWords(struct dict_word* word);
+
 void freeSpace(struct Args* args);
+
+void printDictionary(struct dict_word* currWord, FILE* f);
 
 
 /**

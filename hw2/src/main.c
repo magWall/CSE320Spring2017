@@ -7,6 +7,9 @@ char DEFAULT_DICT_FILE[]= "./rsrc/dictionary.txt"; //default should be rsrc dict
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
 FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
 
+void printDictionary(struct dict_word* currWord, FILE* f); //it wouldn't register hw2.h's statement and I tried include <hw2.h>
+//and the one above
+
 int main(int argc, char *argv[]){
     DEFAULT_INPUT = stdin;
     DEFAULT_OUTPUT = stdout;
@@ -180,15 +183,24 @@ int main(int argc, char *argv[]){
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
     {
 
-        debug("dirname:%s,basename:%s\n",dirname(args->dictFile),basename(args->dictFile));
-        debug("concat:%s",strcat(basename(args->dictFile),dirname(args->dictFile)));
+       // debug("dirname:%s,basename:%s\n",dirname(args->dictFile),basename(args->dictFile));
+        //debug("concat:%s",strcat(basename(args->dictFile),dirname(args->dictFile)));
         char newDictSrc[MAX_SIZE];
-        strcat(newDictSrc,dirname(args->dictFile));
+        char tmpNameHolder[MAX_SIZE];
+        strcpy(tmpNameHolder, args->dictFile);
+        strcpy(newDictSrc,dirname(tmpNameHolder));
+        strcpy(tmpNameHolder, args->dictFile);
+        //debug("%s\n",newDictSrc);
+        //debug("%s\n",args->dictFile);
+
         strcat(newDictSrc, "/new_");
-        strcat(newDictSrc,basename(args->dictFile));
+       // debug("%s\n",newDictSrc);
+       // debug("%s\n",basename(args->dictFile));
+        strcat(newDictSrc,basename(tmpNameHolder));
+//        debug("%s\n",newDictSrc);
         debug("%s\n",newDictSrc);
         dNewFile = fopen(newDictSrc,"w");
-   //     printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
+        printDictionary(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
     }
     fprintf(stderr, "Total number of words in dictionary: %d\n"
                     "Size of dictionary (in bytes): %d\n"
@@ -205,7 +217,7 @@ int main(int argc, char *argv[]){
        ************************
 
     */
-  //  printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
+    printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
         fclose(dNewFile);
     freeSpace(args);

@@ -122,7 +122,30 @@ int totalMisspellings(struct dict_word* currWord){
     }
     return 0;
 }
+void printDictionary(struct dict_word* currWord, FILE* f)
+{
+    if(currWord != NULL)
+    {
+        printDictionary(currWord->next, f);
 
+        char line[MAX_SIZE];
+        int i;
+        sprintf(line, "%s", currWord->word);
+        fprintf(f,"%s",line);
+       if(currWord->num_misspellings>0)
+        fprintf(f,"%s"," ");
+
+       for(i = 0; i<currWord->num_misspellings; i++)
+        {
+            sprintf(line, "%s", currWord->misspelled[i]->word);
+            fprintf(f,"%s",line);
+            if(i !=currWord->num_misspellings)
+                fprintf(f,"%s"," ");
+        }
+        fprintf(f,"%s","\n");
+    }
+
+}
 void printWords(struct dict_word* currWord, FILE* f){
     if(currWord != NULL)
     {
@@ -142,7 +165,7 @@ void printWords(struct dict_word* currWord, FILE* f){
 
         for(i = 0; i<currWord->num_misspellings; i++)
         {
-            debug("goes into here %d\n",i);
+         //   debug("goes into here %d\n",i);
             sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,currWord->misspelled[i]->word);   //number
             fwrite(line, strlen(line)+1, 1, f);
 
