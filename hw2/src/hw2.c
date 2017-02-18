@@ -32,9 +32,9 @@ void processDictionary(FILE* f){
         if((line[strlen(line)-2] != ' ' && line[strlen(line)-1] == '\n') || (line[strlen(line)-1] != ' ' && line[strlen(line)-1] != '\n'))
             strcat(line, " ");      //I feel like this is more convoluted than it needs to be...*SELF NOTE TO CHECK THIS STATEMENT*
 
-        *character = tolower(*character);
         while(*character != 0) //while character isn't null, NULL is treated as pointer so change it to 0 bcz 0= NULL
         {
+            *character = tolower(*character);
             if(counter >= MAX_MISSPELLED_WORDS+1) //only take up to 5, don't break at 5
                 break;
             //if the character is a space, add the word in word_list and make word NULL.
@@ -138,14 +138,14 @@ void printWords(struct dict_word* currWord, FILE* f){
             sprintf(line, "\t\tACTUAL WORD: %s\n", ((currWord->misspelled)[i])->correct_word->word); //needs to point to char word
             fwrite(line, strlen(line)+1, 1, f);
 
-            if(((currWord->misspelled)[i])->next->word != NULL)
+            if(((currWord->misspelled)[i])->next != NULL) //same problem as below
             {
                 sprintf(line, "\t\tNEXT MISPELLED WORD: %s\n", ((currWord->misspelled)[i])->next->word);
                 fwrite(line, strlen(line)+1, 1, f);
             }
         }
 
-        if((currWord->next)->word != NULL)
+        if((currWord->next)!= NULL)//can't check next word if currWord->next is already null, modified next->word to next
         {
             sprintf(line,"\tNEXT WORD: %s\n", (currWord->next)->word);
             fwrite(line, strlen(line)+1, 1, f);
@@ -180,6 +180,8 @@ void processWord(char* inputWord, int numMisspellings){
                 printf("ERROR: OUT OF MEMORY.\n");
                 return;
             }
+               newWord->num_misspellings = 0;
+               newWord->misspelled_count = 0;
 
             addWord(newWord, inputWord);
             dict->word_list = newWord;

@@ -118,8 +118,8 @@ int main(int argc, char *argv[]){
 
 
 
-    strcpy(line,"\n--------INPUT FILE WORDS--------\n");
-    fwrite(line, strlen(line)+1, 1, oFile);         //writes INPUT FILE WORDS or whatever to the outputFile
+ //   strcpy(line,"\n--------INPUT FILE WORDS--------\n");
+ //   fwrite(line, strlen(line)+1, 1, oFile);         //writes INPUT FILE WORDS or whatever to the outputFile
 
     while(!feof(iFile))                             //if !endofINPUTFILE
     {
@@ -135,9 +135,9 @@ int main(int argc, char *argv[]){
             strcat(line, " ");
         //replaces spaces within a line with new lines
 
-        *character = tolower(*character); //convert all characters to lowercase
         while(*character != 0)
         {
+            *character = tolower(*character); //convert all characters to lowercase
             if(*character == ' ' || *character == '\n')
             {
                 char* punct = wdPtr-1;
