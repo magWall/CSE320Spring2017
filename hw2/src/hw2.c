@@ -96,8 +96,8 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
     //debug("misspelledWord->word %s,->next %s\n",misspelledWord->word,misspelledWord->next->word);
 
     (correctWord->misspelled)[correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
-    debug("correctword:%s,num_mispellings %d\n",correctWord->word,correctWord->num_misspellings);
-    debug("correctword's mispelled[%d],%s\n",correctWord->num_misspellings,correctWord->misspelled[correctWord->num_misspellings]->word);
+  //  debug("correctword:%s,num_mispellings %d\n",correctWord->word,correctWord->num_misspellings);
+  //  debug("correctword's mispelled[%d],%s\n",correctWord->num_misspellings,correctWord->misspelled[correctWord->num_misspellings]->word);
     ++correctWord->num_misspellings;
     m_list = misspelledWord;
 }
@@ -296,7 +296,7 @@ void freeSpace(struct Args* args)
     //printf("\n--------FREED WORDS--------\n");
     free(args);
     freeWords(dict->word_list);
-    freeMWords(m_list);
+    //freeMWords(m_list);
     //free dictionary
     free(dict);
     //free m_list

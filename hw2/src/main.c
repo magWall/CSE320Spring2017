@@ -60,6 +60,7 @@ int main(int argc, char *argv[]){
                 break;      //may not be needed
             case 'o': strcpy(args->output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
                         args->o = true;
+             //           debug("reached here, optarg: %s",optarg);
                         oFile = fopen(optarg, "w");
                 break;
             case 'i': strcpy(args->input, optarg);
@@ -149,11 +150,15 @@ int main(int argc, char *argv[]){
             *character = tolower(*character); //convert all characters to lowercase
             if(*character == ' ' || *character == '\n')
             {
-                char* punct = wdPtr-1;
-     //               printf("char:%c",*punct);//dereferenced this to print char
+                char* punct = wdPtr-1; //dont look at space or \n
+
+                debug("end of begin punct:%d\n", 1);
+
                 while(!((*punct>='a' && *punct<='z') || (*punct>='A' && *punct<='Z')))
                 {
+                    fprintf(oFile,"%c",*punct);
                     punct--;
+
                 }
                 punct++;
 //                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
@@ -168,11 +173,12 @@ int main(int argc, char *argv[]){
                    strcat(wdPtr, " ");
                 else
                     strcat(wdPtr,"\n");
-                fwrite(wdPtr, strlen(wdPtr)+1, 1, oFile);
+                //fwrite(wdPtr, strlen(wdPtr)+1, 1, oFile);
+                fprintf(oFile,"%s",wdPtr);
             }
             else
             {
-                *(wdPtr++) = *character;
+                *(wdPtr++) = *character; //gets rid of the space or whatever, ex ---it---\n will add \n to wdPtr
             }
             character++;
         }
