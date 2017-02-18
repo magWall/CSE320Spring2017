@@ -1,6 +1,7 @@
 #include "../include/hw2.h"
 #include <unistd.h>
 #include <libgen.h>
+#include <debug.h>
 
 char DEFAULT_DICT_FILE[]= "./rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
@@ -39,7 +40,7 @@ int main(int argc, char *argv[]){
     args->aFlag = false;
     strcpy(args->dictFile, DEFAULT_DICT_FILE);
 
-    char line[MAX_SIZE];
+   // char line[MAX_SIZE];
     //Declare Files
     FILE* dFile = NULL; //set this to null
     FILE* iFile = NULL; //only set this when there's no default inputs and outputs
@@ -157,7 +158,7 @@ int main(int argc, char *argv[]){
 
                 *wdPtr = 0;             //set terminator here to end string
                 wdPtr = word;
-
+                debug("word is: %s\n",word);
                 processWord(wdPtr, numMispellings);
 
                 if(*character == ' ')
@@ -180,19 +181,19 @@ int main(int argc, char *argv[]){
     {
         char* newDictSrc =  strcat(strcat(dirname(args->dictFile), "/new_"),basename(args->dictFile));
         dNewFile = fopen(newDictSrc,"w");
-  //      printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
-
+//        printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
+//printWords causing segfaults
     }
-
-    strcpy(line, "\n--------DICTIONARY WORDS--------\n");
-    fwrite(line, strlen(line)+1, 1, oFile);
-    //print stats
     fprintf(stderr, "Total number of words in dictionary: %d\n"
                     "Size of dictionary (in bytes): %d\n"
                     "Total number of misspelled words: %d\n"
                     "Top 3 misspelled words:\n", dict->num_words,
                     (int)(sizeof(struct dictionary) + sizeof(struct dict_word) * dict->num_words),
                     totalMisspellings(dict->word_list));
+
+//    strcpy(line, "\n--------DICTIONARY WORDS--------\n");
+ //   fwrite(line, strlen(line)+1, 1, oFile);
+    //print stats
     //remember to add top 3 misspelled words here
     /* *******
        ************************

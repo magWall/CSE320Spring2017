@@ -1,6 +1,6 @@
 #include "../include/hw2.h"
 #include "../include/mispelling.h"
-
+#include <debug.h>
 /* Great filename. */
 
 void processDictionary(FILE* f){
@@ -63,8 +63,9 @@ void processDictionary(FILE* f){
                         printf("ERROR: OUT OF MEMORY.");
                         return;
                     }
-
+                //    debug("m_list before adding mispelled word to dict: %s\n",m_list->word);
                     addMisspelledWord(currMisspelling, currWord, wdPtr);
+                //    debug("m_list after adding mispelled word to dict: %s\n",m_list->word);
                     counter++; //needs to increment somehow...
                 }
             }
@@ -91,6 +92,8 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
     misspelledWord->misspelled = 0;
     misspelledWord->correct_word = correctWord;
     misspelledWord->next = m_list;
+   // debug("m_list's curr word:%s\n", m_list->word);
+    //debug("misspelledWord->word %s,->next %s\n",misspelledWord->word,misspelledWord->next->word);
     (correctWord->misspelled)[++correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
     m_list = misspelledWord;
 }
@@ -222,18 +225,23 @@ void processWord(char* inputWord, int numMisspellings){
                         char** wdPtr =gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
                         struct misspelled_word* newMWord;
 
-                        if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
-                        {
-                            printf("ERROR: OUT OF MEMORY.");
-                            return;
-                        }
+
 
        //                 printf("Enter misspelling: ");
        //                 scanf("%s", word); puts next input into scanf
                          while(i<numMisspellings)                                //an array of misspelling strings
                          {
+                            if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
+                            {
+                                printf("ERROR: OUT OF MEMORY.");
+                                return;
+                            }
+                           // debug("wordPtr at i: %s,%d\n",*(wdPtr+i),i );
+                           // debug("m_list before add:%s %s\n ",m_list->word,m_list->next->word);
                             addMisspelledWord(newMWord, newWord, *(wdPtr+i));
-                            printf("Misspelling added\n");
+                            //printf("Misspelling added\n");
+                            //debug("new m_list: %s %s\n",m_list->word,m_list->next->word);
+
                             i++;
                           }
                      }
@@ -256,6 +264,10 @@ void freeSpace(struct Args* args)
 }
 bool foundMisspelledMatch(char* inputWord){
     struct misspelled_word* listPtr = m_list;
+/*    debug("This is foundMisspelledMatch, %s\n",inputWord);
+    debug("misspelled word: %s\n",listPtr->word);
+    debug("misspelled word: %s\n",listPtr->next->word);
+*/
     while(listPtr != NULL)
     {
         if(strcasecmp(inputWord, listPtr->word) == 0)
