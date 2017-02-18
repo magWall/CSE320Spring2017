@@ -127,9 +127,11 @@ int main(int argc, char *argv[]){
         char* wdPtr = word;
         char line[MAX_SIZE];        //uncommented out
         char* character = line;
+        *line = 0;
 
         fgets(line, MAX_SIZE+1, iFile);
-
+        if(*line ==0)
+            break;
         //if there isn't a space or newline at the end of the line, put one there
         if((line[strlen(line)-1] != ' ') && (line[strlen(line)-1] != '\n'))
             strcat(line, " ");

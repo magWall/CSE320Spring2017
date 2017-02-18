@@ -22,12 +22,18 @@ void processDictionary(FILE* f){
         char* wdPtr = word;
         char line[MAX_SIZE];
         char* character = line;
+        *line =0;
 
 //        char word_list[MAX_MISSPELLED_WORDS+1][MAX_SIZE];      //COMMENTED OUT
         int counter = 0;
         int firstWord = 1;
 
-        fgets(line, MAX_SIZE+1, f);
+        fgets(line, MAX_SIZE+1, f); //to catch for empty line
+        if(*line==0)
+        {
+            free(currWord);
+            return;
+        }
         //if there isn't a space at the end of the line, put one there
         if((line[strlen(line)-2] != ' ' && line[strlen(line)-1] == '\n') || (line[strlen(line)-1] != ' ' && line[strlen(line)-1] != '\n'))
             strcat(line, " ");      //I feel like this is more convoluted than it needs to be...*SELF NOTE TO CHECK THIS STATEMENT*
