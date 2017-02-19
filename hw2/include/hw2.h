@@ -100,9 +100,16 @@ void freeMWords(struct misspelled_word* currWord);
 void freeWords(struct dict_word* word);
 
 char* theMisspelledWord(char* inputWord);
+void nullifySpace(char* arr, int size);
 void freeSpace(struct Args* args);
 
 void printDictionary(struct dict_word* currWord, FILE* f);
+struct dict_word* topMisspelled(struct dict_word* currWord);
+struct dict_word* topTwoMisspelled(struct dict_word* currWord, struct dict_word* no);
+struct dict_word* topThreeMisspelled(struct dict_word* currWord, struct dict_word* no, struct dict_word* no2);
+void printTopThreeMispelledWords(struct dict_word* a);
+
+
 
 
 /**
