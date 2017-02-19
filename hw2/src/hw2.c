@@ -133,6 +133,16 @@ int totalMisspellings(struct dict_word* currWord){
     }
     return 0;
 }
+/*
+int topThreeMisspelled(struct dict_word* currWord)
+{
+    //print to stderr
+    if(currWord != NULL)
+    {
+
+        topThreeMisspelled(currWord->next)
+    }
+} */
 void printDictionary(struct dict_word* currWord, FILE* f)
 {
     if(currWord != NULL)
@@ -302,6 +312,23 @@ void freeSpace(struct Args* args)
     //free m_list
     free(m_list);
 }
+char* theMisspelledWord(char* inputWord){
+    struct misspelled_word* listPtr = m_list;
+/*    debug("This is foundMisspelledMatch, %s\n",inputWord);
+    debug("misspelled word: %s\n",listPtr->word);
+    debug("misspelled word: %s\n",listPtr->next->word);
+*/
+    while(listPtr != NULL)
+    {
+        if(strcasecmp(inputWord, listPtr->word) == 0)
+        {
+            return listPtr->correct_word->word;
+        }
+        listPtr = listPtr->next; //---> is not right, it's ->
+    }
+    return 0;
+}
+
 bool foundMisspelledMatch(char* inputWord){
     struct misspelled_word* listPtr = m_list;
 /*    debug("This is foundMisspelledMatch, %s\n",inputWord);
