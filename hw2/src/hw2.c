@@ -1,4 +1,4 @@
-#include "../include/hw2.h"
+#include <hw2.h>
 #include "../include/mispelling.h"
 #include "../include/debug.h"
 /* Great filename. */
@@ -133,16 +133,80 @@ int totalMisspellings(struct dict_word* currWord){
     }
     return 0;
 }
-/*
-int topThreeMisspelled(struct dict_word* currWord)
+
+
+struct dict_word* topMisspelled(struct dict_word* currWord)
 {
     //print to stderr
     if(currWord != NULL)
     {
+        struct dict_word* tmp = topMisspelled(currWord->next);
+        if(tmp == NULL)
+        {
+            return currWord;
+        }
+        int n = currWord->num_misspellings;
+            if(tmp->num_misspellings<n)
+                return currWord;
+            else
+                return tmp;
 
-        topThreeMisspelled(currWord->next)
     }
-} */
+    return NULL;
+}
+struct dict_word* topTwoMisspelled(struct dict_word* currWord, struct dict_word* no)
+{
+    //print to stderr
+    if(currWord != NULL)
+    {
+        struct dict_word* tmp = topTwoMisspelled(currWord->next,no);
+        if(tmp == NULL ||tmp != no)
+        {
+            return currWord;
+        }
+        int n = currWord->num_misspellings;
+            if(tmp->num_misspellings<n)
+                return currWord;
+            else
+                return tmp;
+
+    }
+    return NULL;
+}
+struct dict_word* topThreeMisspelled(struct dict_word* currWord, struct dict_word* no, struct dict_word* no2)
+{
+    //print to stderr
+    if(currWord != NULL)
+    {
+        struct dict_word* tmp = topThreeMisspelled(currWord->next,no,no2);
+        if(tmp == NULL ||tmp != no || tmp!= no2)
+        {
+            return currWord;
+        }
+        int n = currWord->num_misspellings;
+            if(tmp->num_misspellings<n)
+                return currWord;
+            else
+                return tmp;
+
+    }
+    return NULL;
+}
+void printTopThreeMispelledWords(struct dict_word* a)
+{
+    fprintf(stderr,"%s (%d times):",a->word,a->num_misspellings);
+    int i=0;
+    while(i<a->num_misspellings)
+    {
+        if(i+1<a->num_misspellings)
+            fprintf(stderr,"%s, ",a->misspelled[i]->word);
+        else
+            fprintf(stderr,"%s\n",a->misspelled[i]->word);
+        i++;
+    }
+
+}
+
 void printDictionary(struct dict_word* currWord, FILE* f)
 {
     if(currWord != NULL)
@@ -300,6 +364,13 @@ void processWord(char* inputWord, int numMisspellings){
             //}
         //}
     }
+}
+
+void nullifySpace(char* arr, int size)
+{
+    for (int i=0;i<size;i++)
+        while( *(arr+i)!= 0)
+            *(arr+1)=0;
 }
 void freeSpace(struct Args* args)
 {
