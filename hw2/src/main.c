@@ -1,11 +1,15 @@
 #include "../include/hw2.h"
 #include <unistd.h>
 #include <libgen.h>
+#include "../include/debug.h"
 
 char DEFAULT_DICT_FILE[]= "./rsrc/dictionary.txt"; //default should be rsrc dictionary directory
 FILE* DEFAULT_INPUT= NULL;      //I hate this error
 FILE* DEFAULT_OUTPUT= NULL;     //had to be set to null
 
+void printDictionary(struct dict_word* currWord, FILE* f); //it wouldn't register hw2.h's statement and I tried include <hw2.h>
+//and the one above
+char* theMisspelledWord(char* inputWord); //neither this one
 int main(int argc, char *argv[]){
     DEFAULT_INPUT = stdin;
     DEFAULT_OUTPUT = stdout;
@@ -39,7 +43,7 @@ int main(int argc, char *argv[]){
     args->aFlag = false;
     strcpy(args->dictFile, DEFAULT_DICT_FILE);
 
-    char line[MAX_SIZE];
+   // char line[MAX_SIZE];
     //Declare Files
     FILE* dFile = NULL; //set this to null
     FILE* iFile = NULL; //only set this when there's no default inputs and outputs
@@ -56,6 +60,7 @@ int main(int argc, char *argv[]){
                 break;      //may not be needed
             case 'o': strcpy(args->output, optarg);  //optarg is supposedly the argument being returned if I understand this correctly if flag raised
                         args->o = true;
+             //           debug("reached here, optarg: %s",optarg);
                         oFile = fopen(optarg, "w");
                 break;
             case 'i': strcpy(args->input, optarg);
@@ -145,60 +150,114 @@ int main(int argc, char *argv[]){
             *character = tolower(*character); //convert all characters to lowercase
             if(*character == ' ' || *character == '\n')
             {
-                char* punct = wdPtr-1;
-     //               printf("char:%c",*punct);//dereferenced this to print char
-                while(!((*punct>='a' && *punct<='z') || (*punct>='A' && *punct<='Z')))
+                if(*word != 0)
                 {
-                    punct--;
-                }
-                punct++;
-//                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
 
+                    char* punct = wdPtr-1; //dont look at space or \n
+                    char* beginPunct = word;//beginning punctuations
+                    while(!((*beginPunct>='a' && *beginPunct<='z') || (*beginPunct>='A' && *beginPunct<='Z')))
+                    {
+                        fprintf(oFile,"%c",*beginPunct);
+                        beginPunct++;
 
-                *wdPtr = 0;             //set terminator here to end string
-                wdPtr = word;
+                    }//prints all before word
+                    int pointerLength=0; //punctuation length until end of wdptr
+                    while(!((*punct>='a' && *punct<='z') || (*punct>='A' && *punct<='Z')))
+                    {
+                        debug("currentPunct: %c\n",*punct);
+                        pointerLength++;
+                        punct--;
 
-                processWord(wdPtr, numMispellings);
+                    }
+                    punct++;//might need to save the value of whatever punctuation was here
+                    char tmpLostPunct = *punct;
+                    debug("tLP is: %c\n",tmpLostPunct);
 
-                if(*character == ' ')
-                   strcat(wdPtr, " ");
-                else
-                    strcat(wdPtr,"\n");
-                fwrite(wdPtr, strlen(wdPtr)+1, 1, oFile);
+    //                printf("%d", (int)(strlen(wdPtr)-strlen(punct)) ); //cast strlen into int from long
+
+                    debug("Before 0 word is: %s\n",word);
+                    *punct = 0;             //set terminator here to end string
+                    debug("After 0 word is: %s\n",word);
+
+                    wdPtr = beginPunct;    //skip all the punctuation before the word --t** --is skipped
+                    debug("word is: %s\n",word);
+                    debug("wdPtr is: %s\n",wdPtr);
+
+                    processWord(wdPtr, numMispellings);
+                    if(foundMisspelledMatch(wdPtr)==true) //if word x
+                        {
+                            fprintf(oFile,"%s",theMisspelledWord(wdPtr));//findCorrectWord
+                        }
+                    else
+                        fprintf(oFile,"%s",wdPtr);//else it's the correct word
+                    //print punctuation after, make sure to end the punctuation with null character after
+                    *punct = tmpLostPunct;
+                    *(punct+pointerLength)=0; //null character
+                    fprintf(oFile,"%s",punct);
+
+                    if(*character == ' ')
+                       fprintf(oFile,"%c",*character);
+                    else if(*character == '\n')
+                        fprintf(oFile,"%c",*character);
+                    //fwrite(wdPtr, strlen(wdPtr)+1, 1, oFile);
+                *word = 0; //reset to handle extra spaces
+                wdPtr = word; //move word pointer to point back to the beginning to fix **(wdPtr++) handler
+               }
+               else
+               {
+                fprintf(oFile,"%c",*character);//print out white space
+               }
+
             }
             else
             {
-                *(wdPtr++) = *character;
+                *(wdPtr++) = *character; //gets rid of the space or whatever, ex ---it---\n will add \n to wdPtr
             }
             character++;
         }
 
         if(iFile == stdin)
             break;
-    }
+    } //self reference to undo up to here if you screw up
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
     {
-        char* newDictSrc =  strcat(strcat(dirname(args->dictFile), "/new_"),basename(args->dictFile));
+
+       // debug("dirname:%s,basename:%s\n",dirname(args->dictFile),basename(args->dictFile));
+        //debug("concat:%s",strcat(basename(args->dictFile),dirname(args->dictFile)));
+        char newDictSrc[MAX_SIZE];
+        char tmpNameHolder[MAX_SIZE];
+        strcpy(tmpNameHolder, args->dictFile);
+        strcpy(newDictSrc,dirname(tmpNameHolder));
+        strcpy(tmpNameHolder, args->dictFile);
+        //debug("%s\n",newDictSrc);
+        //debug("%s\n",args->dictFile);
+
+        strcat(newDictSrc, "/new_");
+       // debug("%s\n",newDictSrc);
+       // debug("%s\n",basename(args->dictFile));
+        strcat(newDictSrc,basename(tmpNameHolder));
+//        debug("%s\n",newDictSrc);
+        debug("%s\n",newDictSrc);
         dNewFile = fopen(newDictSrc,"w");
-  //      printWords(dict->word_list , dNewFile); //print new dictionary as well into oFile? edit this
-
+        printDictionary(dict->word_list , dNewFile); //print new dictionary . edit this
     }
-
-    strcpy(line, "\n--------DICTIONARY WORDS--------\n");
-    fwrite(line, strlen(line)+1, 1, oFile);
-    //print stats
     fprintf(stderr, "Total number of words in dictionary: %d\n"
                     "Size of dictionary (in bytes): %d\n"
                     "Total number of misspelled words: %d\n"
                     "Top 3 misspelled words:\n", dict->num_words,
                     (int)(sizeof(struct dictionary) + sizeof(struct dict_word) * dict->num_words),
                     totalMisspellings(dict->word_list));
+
+
+//    strcpy(line, "\n--------DICTIONARY WORDS--------\n");
+ //   fwrite(line, strlen(line)+1, 1, oFile);
+    //print stats
     //remember to add top 3 misspelled words here
     /* *******
        ************************
 
     */
-    printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
+        //printWords(dict->word_list , oFile); //print new dictionary as well into oFile? edit this
     if (args->aFlag == true && (dict->num_words > originalDictWords) ) //if new words are added due to An
         fclose(dNewFile);
     freeSpace(args);

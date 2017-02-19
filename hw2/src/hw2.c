@@ -1,6 +1,6 @@
 #include "../include/hw2.h"
 #include "../include/mispelling.h"
-
+#include "../include/debug.h"
 /* Great filename. */
 
 void processDictionary(FILE* f){
@@ -63,8 +63,9 @@ void processDictionary(FILE* f){
                         printf("ERROR: OUT OF MEMORY.");
                         return;
                     }
-
+                //    debug("m_list before adding mispelled word to dict: %s\n",m_list->word);
                     addMisspelledWord(currMisspelling, currWord, wdPtr);
+                //    debug("m_list after adding mispelled word to dict: %s\n",m_list->word);
                     counter++; //needs to increment somehow...
                 }
             }
@@ -91,7 +92,13 @@ void addMisspelledWord(struct misspelled_word* misspelledWord, struct dict_word*
     misspelledWord->misspelled = 0;
     misspelledWord->correct_word = correctWord;
     misspelledWord->next = m_list;
-    (correctWord->misspelled)[++correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
+   // debug("m_list's curr word:%s\n", m_list->word);
+    //debug("misspelledWord->word %s,->next %s\n",misspelledWord->word,misspelledWord->next->word);
+
+    (correctWord->misspelled)[correctWord->num_misspellings] = misspelledWord; //inrement num mispellings, add to array
+  //  debug("correctword:%s,num_mispellings %d\n",correctWord->word,correctWord->num_misspellings);
+  //  debug("correctword's mispelled[%d],%s\n",correctWord->num_misspellings,correctWord->misspelled[correctWord->num_misspellings]->word);
+    ++correctWord->num_misspellings;
     m_list = misspelledWord;
 }
 
@@ -102,7 +109,18 @@ void freeWords(struct dict_word* currWord){
 
     //    int i;                                    COMMENTED OUT
         //free word
-        printf("FREED %s\n", currWord->word);
+    //    printf("FREED %s\n", currWord->word);
+        free(currWord);
+    }
+}
+void freeMWords(struct misspelled_word* currWord){
+    if(currWord != NULL)
+    {
+        freeMWords(currWord->next); //loop and free all the words in the linkedlist
+
+    //    int i;                                    COMMENTED OUT
+        //free word
+    //    printf("FREED %s\n", currWord->word);
         free(currWord);
     }
 }
@@ -115,7 +133,40 @@ int totalMisspellings(struct dict_word* currWord){
     }
     return 0;
 }
+/*
+int topThreeMisspelled(struct dict_word* currWord)
+{
+    //print to stderr
+    if(currWord != NULL)
+    {
 
+        topThreeMisspelled(currWord->next)
+    }
+} */
+void printDictionary(struct dict_word* currWord, FILE* f)
+{
+    if(currWord != NULL)
+    {
+        printDictionary(currWord->next, f);
+
+        char line[MAX_SIZE];
+        int i;
+        sprintf(line, "%s", currWord->word);
+        fprintf(f,"%s",line);
+       if(currWord->num_misspellings>0)
+        fprintf(f,"%s"," ");
+
+       for(i = 0; i<currWord->num_misspellings; i++)
+        {
+            sprintf(line, "%s", currWord->misspelled[i]->word);
+            fprintf(f,"%s",line);
+            if(i !=currWord->num_misspellings)
+                fprintf(f,"%s"," ");
+        }
+        fprintf(f,"%s","\n");
+    }
+
+}
 void printWords(struct dict_word* currWord, FILE* f){
     if(currWord != NULL)
     {
@@ -135,7 +186,8 @@ void printWords(struct dict_word* currWord, FILE* f){
 
         for(i = 0; i<currWord->num_misspellings; i++)
         {
-            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,((currWord->misspelled)[i])->word);   //number
+         //   debug("goes into here %d\n",i);
+            sprintf(line, "\tMISPELLED WORD #%d: %s\n", i,currWord->misspelled[i]->word);   //number
             fwrite(line, strlen(line)+1, 1, f);
 
             sprintf(line,"\t\tMISPELLED?: %d\n", ((currWord->misspelled)[i])->misspelled);      //should be each individual word
@@ -222,18 +274,23 @@ void processWord(char* inputWord, int numMisspellings){
                         char** wdPtr =gentypos(numMisspellings,inputWord);     //if I understand this correctl, gentypos gives
                         struct misspelled_word* newMWord;
 
-                        if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
-                        {
-                            printf("ERROR: OUT OF MEMORY.");
-                            return;
-                        }
+
 
        //                 printf("Enter misspelling: ");
        //                 scanf("%s", word); puts next input into scanf
                          while(i<numMisspellings)                                //an array of misspelling strings
                          {
+                            if((newMWord = (struct misspelled_word*) malloc(sizeof(struct misspelled_word))) == NULL)
+                            {
+                                printf("ERROR: OUT OF MEMORY.");
+                                return;
+                            }
+                           // debug("wordPtr at i: %s,%d\n",*(wdPtr+i),i );
+                           // debug("m_list before add:%s %s\n ",m_list->word,m_list->next->word);
                             addMisspelledWord(newMWord, newWord, *(wdPtr+i));
-                            printf("Misspelling added\n");
+                            //printf("Misspelling added\n");
+                            //debug("new m_list: %s %s\n",m_list->word,m_list->next->word);
+
                             i++;
                           }
                      }
@@ -249,13 +306,35 @@ void freeSpace(struct Args* args)
     //printf("\n--------FREED WORDS--------\n");
     free(args);
     freeWords(dict->word_list);
+    //freeMWords(m_list);
     //free dictionary
     free(dict);
     //free m_list
     free(m_list);
 }
+char* theMisspelledWord(char* inputWord){
+    struct misspelled_word* listPtr = m_list;
+/*    debug("This is foundMisspelledMatch, %s\n",inputWord);
+    debug("misspelled word: %s\n",listPtr->word);
+    debug("misspelled word: %s\n",listPtr->next->word);
+*/
+    while(listPtr != NULL)
+    {
+        if(strcasecmp(inputWord, listPtr->word) == 0)
+        {
+            return listPtr->correct_word->word;
+        }
+        listPtr = listPtr->next; //---> is not right, it's ->
+    }
+    return 0;
+}
+
 bool foundMisspelledMatch(char* inputWord){
     struct misspelled_word* listPtr = m_list;
+/*    debug("This is foundMisspelledMatch, %s\n",inputWord);
+    debug("misspelled word: %s\n",listPtr->word);
+    debug("misspelled word: %s\n",listPtr->next->word);
+*/
     while(listPtr != NULL)
     {
         if(strcasecmp(inputWord, listPtr->word) == 0)
