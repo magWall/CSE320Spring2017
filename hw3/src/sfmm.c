@@ -78,6 +78,9 @@ void *sf_malloc(size_t size) {
 			}
 			else if( ((sf_header*)listToLoop)->block_size >= sizeAndBlocks &&((sf_header*)listToLoop)->block_size < ((sf_header*)bestFitHeader)->block_size)
 				bestFitHeader = listToLoop; //assign if this mem is lower than prev. free block (best fit)
+			else if(((sf_header*)listToLoop)->block_size >= sizeAndBlocks &&((sf_header*)listToLoop)->block_size == ((sf_header*)bestFitHeader)->block_size))
+				if(listToLoop<bestFitHeader)//if the blocksize is the same, get lower address
+					bestFitHeader =listToLoop;
 			listToLoop = listToLoop->next; //go to next iteration
 
 		}
@@ -139,7 +142,7 @@ void *sf_malloc(size_t size) {
 		}
 		//bestFitHeader != NULL, so valid block found, now check if after calculations, if splintered, if splinter > 32,
 		//try to coaelsce with other free blocks nearby, or keep it as separate free if blocks next to it are allocated
-
+		((sf_header*)bestFitHeader)->block_size;
 		//eventually, calculate, make header + footer + padding
 		//then find splinter if there is one, coaelsce with previous one
 		//change values of previous freed block used if it is greater than 32 and make block smaller
