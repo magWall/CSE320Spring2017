@@ -100,9 +100,9 @@ void *sf_malloc(size_t size) {
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ ((sf_header*)listToLoop)->block_size))->block_size=0; //remove old block size
 					((sf_header*)listToLoop)->block_size=(((sf_header*)listToLoop)->block_size+4096 )>>4; //add new block size
-					((sf_footer*)listToLoop)->block_size=((sf_header*)listToLoop)->block_size; //update new blocksize
-					((sf_footer*)listToLoop)->alloc=((sf_header*)listToLoop)->alloc;
-					((sf_footer*)listToLoop)->splinter=((sf_header*)listToLoop)->splinter;
+					((sf_footer*)((char*)listToLoop) + ((sf_header*)listToLoop)->block_size - 8)->block_size = ((sf_header*)listToLoop)->block_size; //update new blocksize
+					((sf_footer*)((char*)listToLoop) + ((sf_header*)listToLoop)->block_size - 8)->alloc=((sf_header*)listToLoop)->alloc;
+					((sf_footer*)((char*)listToLoop) + ((sf_header*)listToLoop)->block_size - 8)->splinter=((sf_header*)listToLoop)->splinter;
 					tmpBool = 1;
 					break;
 
@@ -127,6 +127,7 @@ void *sf_malloc(size_t size) {
 				sffooterPtr->splinter=0;
 				sffooterPtr->block_size=4096>>4;//header and footer included in block size, shared with alloc + splinter
 				((sf_free_header*)sfheaderPtr)->next=freelist_head;
+				freelist_head->prev = (sf_free_header*) sfheaderPtr;
 				freelist_head = (sf_free_header*) sfheaderPtr; // move list to head
 
 			}
@@ -142,20 +143,125 @@ void *sf_malloc(size_t size) {
 		}
 		//bestFitHeader != NULL, so valid block found, now check if after calculations, if splintered, if splinter > 32,
 		//try to coaelsce with other free blocks nearby, or keep it as separate free if blocks next to it are allocated
+
 		int splinterSize =((sf_header*)bestFitHeader)->block_size - sizeAndBlocks;
 		((sf_header*)bestFitHeader)->alloc = 1;
 		((sf_header*)bestFitHeader)->requested_size = size;
-
-		if(splinterSize<32 && splinterSize>0)
+		((sf_header*)bestFitHeader)->padding_size = padding;
+		if(splinterSize>0 && splinterSize<32)
 		{
+			((sf_header*)bestFitHeader)->splinter_size = splinterSize;
+			((sf_header*)bestFitHeader)->splinter = 1;
 
+			sf_free_header* listToLoop = freelist_head;
+			while(listToLoop->next != NULL)
+			{
+				if(listToLoop == bestFitHeader)
+				{
+					if(listToLoop->prev !=NULL)
+					{
+						if(listToLoop->next != NULL) // somethigng remove/modify somethnig
+						{
+							bestFitHeader->prev->next = bestFitHeader->next;
+							bestFitHeader->next->prev = bestFitHeader->prev;
+						}
+						else							//something remove,  			bestFitHeader at the end of list
+							bestFitHeader->prev->next = NULL;
+					}
+					else if(listToLoop->prev == NULL) //front
+					{
+						if(listToLoop->next != NULL)
+						{
+							listToLoop->next->prev = NULL;
+							freelist_head= listToLoop->next;
+						}
+						else if(listToLoop->next == NULL) //only 1 element in list
+						{
+							freelist_head = NULL;
+							break;
+						}
+					}
+				}
 
+					listToLoop= listToLoop->next;
+			}
+
+		}
+		else if(splinterSize>32)
+		{
+			((sf_header*)bestFitHeader)->splinter_size = 0;
+			((sf_header*)bestFitHeader)->splinter = 0;
+			sf_footer* tmpAddr = ((sf_footer*) ((char*) bestFitHeader) + ((sf_header*)bestFitHeader)->block_size - splinterSize -8);
+			//effectively  tmpAddr = new footer    |  code   |footer|newHeader|payloadSplinter|footer|
+			tmpAddr->block_size =  ((sf_header*)bestFitHeader)->block_size-splinterSize;
+			tmpAddr->splinter = 0;
+			tmpAddr-> alloc = 1;
+			((sf_header*)bestFitHeader)->block_size = ((sf_header*)bestFitHeader)->block_size - splinterSize; //|header payload footer|
+			//block 1 finished allocation
+			//beginning of second block
+			tmpAddr = ((sf_footer*) (char*) bestFitHeader + ((sf_header*)bestFitHeader)->block_size +1 );
+			((sf_header*)tmpAddr )-> block_size = splinterSize;
+			((sf_header*)tmpAddr) -> alloc = 0;
+			((sf_header*)tmpAddr) -> splinter =0;
+			((sf_header*)tmpAddr) -> requested_size=0;
+			((sf_header*)tmpAddr) -> padding_size = 0;
+			((sf_header*)tmpAddr) -> splinter_size = 0;
+
+			tmpAddr = (sf_footer*)((char*)tmpAddr + splinterSize - 8);
+			tmpAddr -> alloc = 0;
+			tmpAddr -> splinter =0;
+			tmpAddr -> block_size = splinterSize;
+			tmpAddr = (sf_footer*)((char*)tmpAddr - splinterSize + 8);
+
+			sf_free_header* listToLoop = freelist_head;
+			while(listToLoop->next != NULL)
+			{
+				if(listToLoop == bestFitHeader)
+				{
+					if(listToLoop->prev !=NULL)
+					{
+						if(listToLoop->next != NULL) // somethigng remove/modify somethnig
+						{
+							bestFitHeader->prev->next = (sf_free_header*)tmpAddr;
+							bestFitHeader->next->prev = (sf_free_header*)tmpAddr;
+							((sf_free_header*)tmpAddr)->prev = bestFitHeader->prev;
+							((sf_free_header*)tmpAddr)->next = bestFitHeader->next;
+						}
+						else							//something remove,  			bestFitHeader at the end of list
+							{
+								((sf_free_header*)tmpAddr)->next = NULL;
+								((sf_free_header*)tmpAddr)->prev = listToLoop->prev;
+								listToLoop->prev->next = (sf_free_header*)tmpAddr;
+							}
+					}
+					else if(listToLoop->prev == NULL) //front of list
+					{
+						if(listToLoop->next != NULL)
+							{
+								listToLoop->next->prev = (sf_free_header*)tmpAddr;
+								((sf_free_header*)tmpAddr)->next = listToLoop->next;
+								((sf_free_header*)tmpAddr)->prev = NULL;
+								freelist_head = (sf_free_header*)tmpAddr;
+							}
+							else //only bestFitHeader exists
+							{
+								((sf_free_header*)tmpAddr)->next = NULL;
+								((sf_free_header*)tmpAddr)->prev = NULL;
+								freelist_head = (sf_free_header*)tmpAddr;
+							}
+					}
+				}
+
+					listToLoop= listToLoop->next;
+			}
+			//splitBlock second allocation block done
+			//normally you would coaeslce, but in this case, it's not when you called a free block so this is fine
 		}
 		//eventually, calculate, make header + footer + padding
 		//then find splinter if there is one, coaelsce with previous one
 		//change values of previous freed block used if it is greater than 32 and make block smaller
 		//add new allocated block to list, but when running checks, you look to see if list is free
-
+		return  (void*)((char*) bestFitHeader + 8);
 
 	return NULL;
 }
