@@ -13,11 +13,11 @@ Dictionary file does not exists,1.0,1.0,RETURN VALUE: CORRECT PASSED CASE
 simple1: output to file that exists,3.5,3.5,RETURN VALUE: CORRECT PASSED CASE 
 simple1: output to file that does not exists,3.5,3.5,RETURN VALUE: CORRECT PASSED CASE 
 dictionary2: correct medium1 (pre/post symbols),0.5,2.5,RETURN VALUE: CORRECT FAILED CASE: NON UNICODE BYTES 
-dictionary2: unchanged medium2 (pre/post symbols),2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
-"dictionary2: new word in medium3 check output (pre/post symbols, 2 new words)",SIGFPE,2.5,RETURN VALUE: EXPECTED 0 RECEIVED -8 FAILED CASE: SIGNAL 8 
-"dictionary2: new word in medium3 check dictionary (pre/post symbols, 2 new words)",SIGFPE,2.5,RETURN VALUE: EXPECTED 0 RECEIVED -8 FAILED CASE: SIGNAL 8 
+dictionary2: unchanged medium2 (pre/post symbols),0.5,2.5,RETURN VALUE: CORRECT FAILED CASE: NON UNICODE BYTES 
+"dictionary2: new word in medium3 check output (pre/post symbols, 2 new words)",0.5,2.5,RETURN VALUE: CORRECT FAILED CASE: DIFF 
+"dictionary2: new word in medium3 check dictionary (pre/post symbols, 2 new words)",0.5,2.5,RETURN VALUE: CORRECT new_dictionary2.txt WAS NOT FOUND 
 medium1: output to file that exists,2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
-medium1: output to file that does not exists,0.5,2.5,RETURN VALUE: CORRECT FAILED CASE: NON UNICODE BYTES 
+medium1: output to file that does not exists,2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
 "dictionary3: correct hard1 (no new words, symbols in/pre/post words)",2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
 "dictionary3: unchanged hard2 (no corrections, symbols in/pre/post words)",2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
 dictionary3: 2 new words in hard3 check output,0.5,2.5,RETURN VALUE: CORRECT FAILED CASE: DIFF 
@@ -25,9 +25,9 @@ dictionary3: 2 new word in hard3 check dictionary,0.5,2.5,RETURN VALUE: CORRECT 
 hard1: output to file that exists,2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
 hard1: output to file that does not exists,2.5,2.5,RETURN VALUE: CORRECT PASSED CASE 
 statistics for simple1,0,2,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE: DIFF 
-statistics for medium1,0,2,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE: DIFF 
+statistics for medium1,0,2,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE: NON UNICODE BYTES 
 statistics for hard1,0,2,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE: DIFF 
 memory usage for simple1,0,3,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE 
 memory usage for medium1,0,3,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE 
 memory usage for hard1,0,3,RETURN VALUE: EXPECTED 0 RECEIVED 0 FAILED CASE 
-Total,47.0,75.0,
+Total,48.0,75.0,
