@@ -99,7 +99,7 @@ void *sf_malloc(size_t size) {
 				{
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ ((sf_header*)listToLoop)->block_size))->block_size=0; //remove old block size
-					((sf_header*)listToLoop)->block_size=((sf_header*)listToLoop)->block_size+4096; //add new block size
+					((sf_header*)listToLoop)->block_size=(((sf_header*)listToLoop)->block_size+4096 )>>4; //add new block size
 					((sf_footer*)listToLoop)->block_size=((sf_header*)listToLoop)->block_size; //update new blocksize
 					((sf_footer*)listToLoop)->alloc=((sf_header*)listToLoop)->alloc;
 					((sf_footer*)listToLoop)->splinter=((sf_header*)listToLoop)->splinter;
@@ -142,7 +142,15 @@ void *sf_malloc(size_t size) {
 		}
 		//bestFitHeader != NULL, so valid block found, now check if after calculations, if splintered, if splinter > 32,
 		//try to coaelsce with other free blocks nearby, or keep it as separate free if blocks next to it are allocated
-		((sf_header*)bestFitHeader)->block_size;
+		int splinterSize =((sf_header*)bestFitHeader)->block_size - sizeAndBlocks;
+		((sf_header*)bestFitHeader)->alloc = 1;
+		((sf_header*)bestFitHeader)->requested_size = size;
+
+		if(splinterSize<32 && splinterSize>0)
+		{
+
+
+		}
 		//eventually, calculate, make header + footer + padding
 		//then find splinter if there is one, coaelsce with previous one
 		//change values of previous freed block used if it is greater than 32 and make block smaller
