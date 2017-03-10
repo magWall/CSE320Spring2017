@@ -78,7 +78,7 @@ void *sf_malloc(size_t size) {
 			}
 			else if( ((sf_header*)listToLoop)->block_size >= sizeAndBlocks &&((sf_header*)listToLoop)->block_size < ((sf_header*)bestFitHeader)->block_size)
 				bestFitHeader = listToLoop; //assign if this mem is lower than prev. free block (best fit)
-			else if(((sf_header*)listToLoop)->block_size >= sizeAndBlocks &&((sf_header*)listToLoop)->block_size == ((sf_header*)bestFitHeader)->block_size))
+			else if( ((sf_header*)listToLoop)->block_size >= sizeAndBlocks &&((sf_header*)listToLoop)->block_size == ((sf_header*)bestFitHeader)->block_size)
 				if(listToLoop<bestFitHeader)//if the blocksize is the same, get lower address
 					bestFitHeader =listToLoop;
 			listToLoop = listToLoop->next; //go to next iteration
