@@ -110,6 +110,22 @@ void *sf_malloc(size_t size) {
 			if(tmpBool==0)
 			{
 				//add new page of memory
+				sf_header* sfheaderPtr = (sf_header*) addrPtr;
+				sfheaderPtr->alloc= 0;
+				sfheaderPtr->splinter = 0;
+				sfheaderPtr->block_size= 4096>>4; //shared 32 bits with alloc and splinter
+				//sfheaderPtr->unused_bits ignore unused unless realloc, set0
+				sfheaderPtr->requested_size=4096;
+				sfheaderPtr->splinter_size=0; //originally, new page = no splinter, else is blockSize-sizeAndblocks
+				sfheaderPtr->padding_size=0;
+
+				sf_footer* sffooterPtr = (sf_footer*) ((char*)sbrkPtr-8);//get beginning of struct footer, then cast into footer
+				sffooterPtr->alloc = 0;
+				sffooterPtr->splinter=0;
+				sffooterPtr->block_size=4096>>4;//header and footer included in block size, shared with alloc + splinter
+				((sf_free_header*)sfheaderPtr)->next=freelist_head;
+				freelist_head = (sf_free_header*) sfheaderPtr; // move list to head
+
 			}
 		}
 		else if(numPages+1>=5 && bestFitHeader == NULL) //condition cannot allow you to loop any further
