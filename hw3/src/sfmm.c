@@ -408,19 +408,19 @@ void sf_free(void* ptr) {//ptr is at payload
 
 	//freelist_head = (sf_free_header*)beginningPtr; //added pointer back to free
 
+		beginningPtr->splinter=0;
+		beginningPtr->splinter_size=0;
 		sf_free_header* listToLoop = freelist_head;
 		if(listToLoop == NULL)
 		{
 			beginningPtr->alloc = 0;
-			beginningPtr->splinter=0;
-			beginningPtr->splinter_size=0;
 			((sf_free_header*)beginningPtr)->next = freelist_head;
 			((sf_free_header*)beginningPtr)->prev = NULL;
 			freelist_head = (sf_free_header*)beginningPtr;
 			return;
 		}
-		sf_header* backBlock = (sf_header*)((char*)beginningPtr - ((sf_footer*) (((char*)beginningPtr)-8))->block_size);
-		sf_header* frontBlock = (sf_header*) (((char*)beginningPtr)+ ((sf_header*)beginningPtr)->block_size);
+		sf_header* backBlock = (sf_header*)((char*)beginningPtr - (((sf_footer*) (((char*)beginningPtr)-8))->block_size<<4) );
+		sf_header* frontBlock = (sf_header*) (((char*)beginningPtr)+ (((sf_header*)beginningPtr)->block_size<<4) );
 		//loop through list
 		while(listToLoop != NULL)
 		{
@@ -428,17 +428,17 @@ void sf_free(void* ptr) {//ptr is at payload
 			{
 				if(listToLoop->next != NULL && listToLoop->next == (sf_free_header*)frontBlock)
 				{
-					( (sf_header*)((char*)listToLoop + ((sf_header*)listToLoop)->block_size - 8))->block_size =0;//removing old ptr
+					( (sf_header*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) - 8))->block_size =0;//removing old ptr
 
 					((sf_header*)listToLoop)->block_size =((sf_header*)listToLoop)->block_size +beginningPtr->block_size+
 					((sf_header*)(listToLoop->next))->block_size; //new block size
-					((sf_footer*)((char*)listToLoop + ((sf_header*)listToLoop)->block_size -8))->block_size= ((sf_header*)listToLoop)->block_size;
-					((sf_footer*)((char*)listToLoop + ((sf_header*)listToLoop)->block_size -8))->alloc = 0;
-					((sf_footer*)((char*)listToLoop + ((sf_header*)listToLoop)->block_size -8))->splinter = 0;//new footer
+					((sf_footer*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) -8))->block_size= ((sf_header*)listToLoop)->block_size;
+					((sf_footer*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) -8))->alloc = 0;
+					((sf_footer*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) -8))->splinter = 0;//new footer
 
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->block_size=0;
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->alloc = 0;
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->splinter = 0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size=0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc = 0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter = 0;
 					beginningPtr->block_size=0; //remove ptr's old block sizes
 					beginningPtr->alloc = 0;
 					beginningPtr->splinter=0;
@@ -448,35 +448,57 @@ void sf_free(void* ptr) {//ptr is at payload
 					{
 						listToLoop->next = listToLoop->next->next; //removing old frees that's part of this one
 						listToLoop->next->prev = listToLoop;
+						return;
 					}
 					else
 					{
 						listToLoop->next = NULL;
+						return;
 					}
 				}
 				else //coaelsce Back only
 				{
 					//remove old ptr
-					((sf_footer*) ((char*)listToLoop + ((sf_header*)(listToLoop))->block_size -8))->block_size = 0;//remove old block size;
+					((sf_footer*) ((char*)listToLoop + (((sf_header*)(listToLoop))->block_size<<4) -8))->block_size = 0;//remove old block size;
 					((sf_header*)(listToLoop))->block_size =((sf_header*)(listToLoop))->block_size +beginningPtr->block_size;
-					((sf_footer*) ((char*)listToLoop + ((sf_header*)(listToLoop))->block_size -8))->block_size = ((sf_header*)listToLoop)->block_size;
-					((sf_footer*) ((char*)listToLoop + ((sf_header*)(listToLoop))->block_size -8))->alloc = 0;
-					((sf_footer*) ((char*)listToLoop + ((sf_header*)(listToLoop))->block_size -8))->splinter = 0;
+					((sf_footer*) ((char*)listToLoop + (((sf_header*)(listToLoop))->block_size<<4) -8))->block_size = ((sf_header*)listToLoop)->block_size;
+					((sf_footer*) ((char*)listToLoop + (((sf_header*)(listToLoop))->block_size<<4) -8))->alloc = 0;
+					((sf_footer*) ((char*)listToLoop + (((sf_header*)(listToLoop))->block_size<<4) -8))->splinter = 0;
 
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->block_size=0;
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->alloc = 0;
-					((sf_footer*)((char*)beginningPtr + beginningPtr->block_size - 8))->splinter = 0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size=0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc = 0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter = 0;
 					beginningPtr->block_size=0; //remove ptr's old block sizes
 					beginningPtr->alloc = 0;
-					beginningPtr->splinter=0;
+					beginningPtr->splinter=0;	//too tired to check what doesn't need to be here or If I'm running duplicate calls
 					beginningPtr->splinter_size=0;
-
+					return;
 				}
 
 
 			} //back is either null, or cannot coaelsce
 			else if(listToLoop == (sf_free_header*)frontBlock)
 			{//coaelsce the front block with beginningPtr   so  |beginPtrhdr|beginPtrftr|frontBlock|
+
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size = 0; //remove old fotoer
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc = 0;
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter = 0;
+
+				beginningPtr->block_size =beginningPtr->block_size+ frontBlock->block_size; //change header size
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size = beginningPtr->block_size; //change footer
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc =0;  //prob dont need to allocate here but just in case
+				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter =0;
+
+				//replace current loop with next one
+				((sf_free_header*)beginningPtr)->next = ((sf_free_header*)frontBlock)->next;
+				((sf_free_header*)beginningPtr)->prev = ((sf_free_header*)frontBlock)->prev;
+				if(listToLoop->prev != NULL)
+					listToLoop->prev->next = (sf_free_header*)beginningPtr;
+				if(listToLoop->next !=NULL)
+					listToLoop->next->prev = (sf_free_header*)beginningPtr;
+				((sf_header*)listToLoop)->block_size=0; //make current block part of beginningPtr
+				((sf_footer*) ((char*)listToLoop +(((sf_header*)listToLoop)->block_size<<4) -8))->block_size=0; //make current footer 0
+				return;
 
 			}
 			listToLoop = listToLoop->next;
