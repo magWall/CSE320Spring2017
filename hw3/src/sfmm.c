@@ -99,7 +99,7 @@ void *sf_malloc(size_t size) {
 				if( ((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ) ==addrPtr ) //if address is the same
 				{
 					//coaelsce if found, bool is true
-					((sf_footer*)((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ))->block_size=0; //remove old block size
+					((sf_footer*)((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) -8))->block_size=0; //remove old block size
 					((sf_header*)listToLoop)->block_size= ((((sf_header*)listToLoop)->block_size<<4) +4096 )>>4; //add new block size
 					((sf_footer*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) - 8))->block_size = ((sf_header*)listToLoop)->block_size; //update new blocksize
 					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->alloc=((sf_header*)listToLoop)->alloc;
@@ -522,6 +522,7 @@ void sf_free(void* ptr) {//ptr is at payload
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter = 0;
 
 				beginningPtr->block_size =beginningPtr->block_size+ frontBlock->block_size; //change header size
+				beginningPtr->alloc = 0;
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size = beginningPtr->block_size; //change footer
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc =0;  //prob dont need to allocate here but just in case
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter =0;
@@ -557,6 +558,12 @@ void sf_free(void* ptr) {//ptr is at payload
 					{
 						((sf_free_header*)beginningPtr)->prev = NULL;
 						listToLoop->prev = (sf_free_header*)beginningPtr;
+						((sf_free_header*)beginningPtr)->next = listToLoop;
+						while(listToLoop->prev!=NULL) //go find the beginning of the pointer after moving it,only happens in front of list
+						{
+							listToLoop = listToLoop->prev;
+						}
+						freelist_head = listToLoop;
 						return;
 					}
 					else //not null, have back ptr
