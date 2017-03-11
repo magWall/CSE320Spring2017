@@ -101,7 +101,7 @@ void *sf_malloc(size_t size) {
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ))->block_size=0; //remove old block size
 					((sf_header*)listToLoop)->block_size= ((((sf_header*)listToLoop)->block_size<<4) +4096 )>>4; //add new block size
-					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->block_size = ((sf_header*)listToLoop)->block_size; //update new blocksize
+					((sf_footer*)((char*)listToLoop + (((sf_header*)listToLoop)->block_size<<4) - 8))->block_size = ((sf_header*)listToLoop)->block_size; //update new blocksize
 					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->alloc=((sf_header*)listToLoop)->alloc;
 					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->splinter=((sf_header*)listToLoop)->splinter;
 					tmpBool = 1;
@@ -430,7 +430,8 @@ void sf_free(void* ptr) {//ptr is at payload
 		errno = EINVAL;
 		return;
 	}
-	if( ((sf_footer*)(((char*)beginningPtr) +beginningPtr->block_size -8)) ->block_size != beginningPtr->block_size)
+
+	if( ((sf_footer*)((char*)beginningPtr +(beginningPtr->block_size<<4) -8))->block_size != beginningPtr->block_size)
 	{
 		//not same footer and header blocksize,
 		errno = EINVAL;
