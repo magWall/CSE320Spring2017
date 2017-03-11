@@ -46,7 +46,7 @@ void *sf_malloc(size_t size) {
 		sfheaderPtr->splinter = 0;
 		sfheaderPtr->block_size= 4096>>4; //shared 32 bits with alloc and splinter
 		//sfheaderPtr->unused_bits ignore unused unless realloc, set0
-		sfheaderPtr->requested_size=4096;
+		sfheaderPtr->requested_size=0;
 		sfheaderPtr->splinter_size=0; //originally, new page = no splinter, else is blockSize-sizeAndblocks
 		sfheaderPtr->padding_size=0;
 
@@ -93,9 +93,9 @@ void *sf_malloc(size_t size) {
 			//coaelsce here with address of last free
 			sf_free_header* listToLoop = freelist_head;
 			int tmpBool=0; //false not found
-			while(listToLoop->next != NULL)
+			while(listToLoop != NULL)
 			{
-				if( ((char*)listToLoop+ ((sf_header*)listToLoop)->block_size)+1==addrPtr )
+				if( ((char*)listToLoop+ ((sf_header*)listToLoop)->block_size)+1==addrPtr ) //if address is the same
 				{
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ ((sf_header*)listToLoop)->block_size))->block_size=0; //remove old block size
@@ -118,7 +118,7 @@ void *sf_malloc(size_t size) {
 				sfheaderPtr->splinter = 0;
 				sfheaderPtr->block_size= 4096>>4; //shared 32 bits with alloc and splinter
 				//sfheaderPtr->unused_bits ignore unused unless realloc, set0
-				sfheaderPtr->requested_size=4096;
+				sfheaderPtr->requested_size=0;
 				sfheaderPtr->splinter_size=0; //originally, new page = no splinter, else is blockSize-sizeAndblocks
 				sfheaderPtr->padding_size=0;
 
@@ -148,13 +148,14 @@ void *sf_malloc(size_t size) {
 		((sf_header*)bestFitHeader)->alloc = 1;
 		((sf_header*)bestFitHeader)->requested_size = size;
 		((sf_header*)bestFitHeader)->padding_size = padding;
-		if(splinterSize>0 && splinterSize<32)
+		if(splinterSize>=0 && splinterSize<32)
 		{
 			((sf_header*)bestFitHeader)->splinter_size = splinterSize;
-			((sf_header*)bestFitHeader)->splinter = 1;
+			if(splinterSize>0)
+				((sf_header*)bestFitHeader)->splinter = 1;
 
 			sf_free_header* listToLoop = freelist_head;
-			while(listToLoop->next != NULL)
+			while(listToLoop != NULL)
 			{
 				if(listToLoop == bestFitHeader)
 				{
@@ -214,7 +215,7 @@ void *sf_malloc(size_t size) {
 			tmpAddr = (sf_footer*)((char*)tmpAddr - splinterSize + 8);
 
 			sf_free_header* listToLoop = freelist_head;
-			while(listToLoop->next != NULL)
+			while(listToLoop != NULL)
 			{
 				if(listToLoop == bestFitHeader)
 				{
