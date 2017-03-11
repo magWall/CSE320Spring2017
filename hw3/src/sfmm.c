@@ -68,7 +68,7 @@ void *sf_malloc(size_t size) {
 	{
 
 		sf_free_header* listToLoop = freelist_head;
-		while(listToLoop->next != NULL)
+		while(listToLoop != NULL)
 		{
 			if(bestFitHeader == NULL)
 			{
@@ -96,7 +96,7 @@ void *sf_malloc(size_t size) {
 			int tmpBool=0; //false not found
 			while(listToLoop != NULL)
 			{
-				if( ((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) )+1==addrPtr ) //if address is the same
+				if( ((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ) ==addrPtr ) //if address is the same
 				{
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ))->block_size=0; //remove old block size
@@ -206,7 +206,7 @@ void *sf_malloc(size_t size) {
 			((sf_footer*) (((char*)bestFitHeader)+sizeAndBlocks-8))->splinter = 0;
 			((sf_footer*) (((char*)bestFitHeader)+sizeAndBlocks-8))->block_size = sizeAndBlocks>>4;
 
-			sf_free_header* tmpAddr = ((sf_free_header*) ((char*) bestFitHeader) + sizeAndBlocks +1); //first footer
+			sf_free_header* tmpAddr = ((sf_free_header*) (((char*) bestFitHeader) + sizeAndBlocks )); //first footer
 			//effectively  tmpAddr = new footer    |  code   |footer|newHeader|payloadSplinter|footer|
 
 			//tmpAddr->block_size = sizeAndBlocks>>4; //((((sf_header*)bestFitHeader)->block_size<<4) -splinterSize)>>4;
@@ -227,7 +227,7 @@ void *sf_malloc(size_t size) {
 			((sf_footer*)tmpAddr) -> alloc = 0;
 			((sf_footer*)tmpAddr) -> splinter =0;
 			((sf_footer*)tmpAddr) -> block_size = splinterSize>>4;
-			tmpAddr = (sf_free_header*)( ((char*)bestFitHeader) +sizeAndBlocks+1);
+			tmpAddr = ((sf_free_header*)( ((char*)bestFitHeader) +sizeAndBlocks));
 
 			sf_free_header* listToLoop = freelist_head;
 			while(listToLoop != NULL)
@@ -332,7 +332,7 @@ void *sf_realloc(void *ptr, size_t size) {
 			int tmpBool=0; //false not found
 			while(listToLoop != NULL)
 			{
-				if( ((char*)listToLoop+ ((sf_header*)listToLoop)->block_size)+1==addrPtr ) //if address is the same
+				if( ((char*)listToLoop+ ((sf_header*)listToLoop)->block_size)==addrPtr ) //if address is the same
 				{
 					//coaelsce if found, bool is true
 					((sf_footer*)((char*)listToLoop+ ((sf_header*)listToLoop)->block_size))->block_size=0; //remove old block size
@@ -382,7 +382,46 @@ void *sf_realloc(void *ptr, size_t size) {
 	return NULL;
 }
 
-void sf_free(void* ptr) {
+void sf_free(void* ptr) {//ptr is at payload
+	if(ptr == NULL)
+	{
+		errno = EINVAL;
+		return;
+	}
+	sf_header* beginningPtr = (sf_header*)((char*)ptr - 8);
+	if(beginningPtr->alloc == 0 || beginningPtr->alloc == 2) //if not allocated, cannot free
+	{
+		errno = EINVAL;
+		return;
+	}
+//	int padding= beginningPtr->padding_size;
+//	int splinterSize =0;
+//	if(beginningPtr->splinter == 1)
+//		splinterSize = beginningPtr->splinter_size;
+	beginningPtr->alloc= 0;
+
+	sf_free_header* listToLoopThrough = freelist_head;
+	((sf_free_header*)beginningPtr)->next = freelist_head;
+	((sf_free_header*)beginningPtr)->prev = NULL;
+	freelist_head->prev = ((sf_free_header*)beginningPtr);
+	freelist_head = (sf_free_header*)beginningPtr; //added pointer back to free
+
+	while(listToLoopThrough!= NULL)
+	{
+		sf_free_header* listToLoop = freelist_head;
+		while(listToLoop != NULL)
+		{
+
+			if( (char*) listToLoop+ ((sf_header*)listToLoop)->block_size == (char*)listToLoopThrough-1 ) // header listToLoop footer beginningPtrHeader
+			{
+
+			}//if addresses maintch, coelsce
+			listToLoop = listToLoop->next;
+		}
+		listToLoopThrough = listToLoopThrough->next;
+	}
+
+
 	return;
 }
 
