@@ -94,7 +94,7 @@ void *sf_malloc(size_t size) {
 			//coaelsce here with address of last free
 			sf_free_header* listToLoop = freelist_head;
 			int tmpBool=0; //false not found
-			while(listToLoop != NULL)
+			while(listToLoop != NULL)//find page to coaelsce blocks together, else make new page if mem of page is not free
 			{
 				if( ((char*)listToLoop+ (((sf_header*)listToLoop)->block_size<<4) ) ==addrPtr ) //if address is the same
 				{
@@ -127,9 +127,45 @@ void *sf_malloc(size_t size) {
 				sffooterPtr->alloc = 0;
 				sffooterPtr->splinter=0;
 				sffooterPtr->block_size=4096>>4;//header and footer included in block size, shared with alloc + splinter
-				((sf_free_header*)sfheaderPtr)->next=freelist_head;
-				freelist_head->prev = (sf_free_header*) sfheaderPtr;
-				freelist_head = (sf_free_header*) sfheaderPtr; // move list to head
+
+				sf_free_header* listToLoop = freelist_head;
+				if(listToLoop != NULL)
+				{
+					while(listToLoop != NULL)
+					{
+						if( (char*)listToLoop> (char*)sfheaderPtr)
+						{
+							((sf_free_header*)sfheaderPtr)->next=listToLoop; //some block || added || list to loop
+							if(listToLoop->prev != NULL)
+							{
+								((sf_free_header*) sfheaderPtr)->prev = listToLoop->prev;
+								listToLoop->prev->next = (sf_free_header*) sfheaderPtr;
+								listToLoop->prev = ((sf_free_header*) sfheaderPtr);
+							}
+							//prev == NUL
+							else
+							{
+								((sf_free_header*) sfheaderPtr)->prev = NULL;
+								listToLoop->prev = ((sf_free_header*) sfheaderPtr);
+							}
+						}
+						else if((char*)listToLoop< (char*)sfheaderPtr && listToLoop->next == NULL)
+						{
+							((sf_free_header*) sfheaderPtr)->next = NULL;
+							((sf_free_header*) sfheaderPtr)->prev = listToLoop;
+							listToLoop->next = (sf_free_header*) sfheaderPtr;
+						}
+
+						listToLoop = listToLoop->next;
+					}
+				}
+				else if(listToLoop==NULL)
+				{
+					//throw new page in
+					((sf_free_header*) sfheaderPtr)->next = NULL;
+					((sf_free_header*) sfheaderPtr)->prev = NULL;
+					listToLoop = (sf_free_header*)sfheaderPtr;
+				}
 
 			}
 		}
@@ -389,7 +425,7 @@ void sf_free(void* ptr) {//ptr is at payload
 		return;
 	}
 	sf_header* beginningPtr = (sf_header*)((char*)ptr - 8);
-	if(beginningPtr->alloc == 0 || beginningPtr->alloc == 2) //if not allocated, cannot free
+	if(beginningPtr->alloc == 0 || beginningPtr->alloc >= 2) //if not allocated, cannot free
 	{
 		errno = EINVAL;
 		return;
@@ -504,9 +540,47 @@ void sf_free(void* ptr) {//ptr is at payload
 			listToLoop = listToLoop->next;
 		}
 			//if addresses maintch, coelsce
-			//if can't coaelsce, then might as well just throw it into list BY FINDING WHERE IT IS SORTED,
+			//if can't coaelsce, case - 4 then might as well just throw it into list BY FINDING WHERE IT IS SORTED,
 			//test to see if there are nulls to left/right
+			listToLoop = freelist_head;
+			while(listToLoop !=NULL)
+			{
+				if( (char*)listToLoop > (char*)beginningPtr) // or beginningPtr <listToLoop
+				{
+					beginningPtr->alloc = 0;
+					beginningPtr->splinter=0;
+					beginningPtr->splinter_size=0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc =0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter =0;
+					if(listToLoop->prev == NULL)
+					{
+						((sf_free_header*)beginningPtr)->prev = NULL;
+						listToLoop->prev = (sf_free_header*)beginningPtr;
+						return;
+					}
+					else //not null, have back ptr
+					{
+						((sf_free_header*)beginningPtr)->prev =  listToLoop->prev;
+						listToLoop->prev->next = ((sf_free_header*)beginningPtr);
+						listToLoop->prev = (sf_free_header*)beginningPtr;
+						return;
+					}
+				}
+				else if( (char*)listToLoop<(char*)beginningPtr &&listToLoop->next == NULL )// listToLoop ptr NULL, , beginningPtr attached to end
+				{
+					beginningPtr->alloc = 0;
+					beginningPtr->splinter=0;
+					beginningPtr->splinter_size=0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc =0;
+					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter =0;
+					((sf_free_header*)beginningPtr)->next = NULL;
+					listToLoop->next = (sf_free_header*)beginningPtr;
+					return;
 
+
+				}
+				listToLoop = listToLoop->next;
+			}
 
 
 	return;
