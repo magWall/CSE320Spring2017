@@ -67,3 +67,29 @@ Test(sf_memsuite, Coalesce_no_coalescing, .init = sf_mem_init, .fini = sf_mem_fi
 //STUDENT UNIT TESTS SHOULD BE WRITTEN BELOW
 //DO NOT DELETE THESE COMMENTS
 //#
+
+Test(sf_memsuite, add_4_pages_free_list, .init = sf_mem_init, .fini = sf_mem_fini)
+{
+  int tmp = 4096*3 + 5; //4 pages
+  long* varX = sf_malloc(tmp);
+  sf_header* tpFooter = ((sf_header*)((char*)varX - 8));
+  sf_free(varX);
+   cr_assert(freelist_head->next == NULL, "List should not have next");
+   cr_assert(freelist_head->prev== NULL, "List should not have prev");
+   cr_assert(((sf_header*)freelist_head)->block_size==tpFooter->block_size, "block size incorrect");
+
+}
+Test(sf_memsuite, error_throwing, .init = sf_mem_init, .fini = sf_mem_fini)
+{
+  long* varY= sf_malloc(4096*2);
+  sf_header* y = ((sf_header*) ((char*)varY -8) );
+  cr_assert(y->splinter==0, "should be no splinter");
+  long* varZ = sf_malloc(4096*3);
+  cr_assert(varZ == NULL, "Z should be null, impossible to malloc");
+  sf_free(varY);
+  long* varX = sf_malloc(4096*5);
+  cr_assert(varX ==NULL, "should be null, impossible to malloc");
+
+}
+
+

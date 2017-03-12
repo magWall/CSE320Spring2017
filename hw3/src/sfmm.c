@@ -17,6 +17,12 @@ sf_free_header* freelist_head = NULL;
 void* addrPtr = NULL; // addressPointer at the beginning of heap
 void* sbrkPtr = NULL;
 int numPages = 0;
+size_t allocatedB = 0;
+size_t splinteredB =0;
+size_t paddedAdj = 0;
+size_t splinteredAdj=0;
+size_t numCoalesce = 0;
+double peakMemory = 0;
 void *sf_malloc(size_t size) {
 	if(size==0)
 	{
@@ -105,6 +111,7 @@ void *sf_malloc(size_t size) {
 					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->alloc=((sf_header*)listToLoop)->alloc;
 					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->splinter=((sf_header*)listToLoop)->splinter;
 					tmpBool = 1;
+					numCoalesce++;
 					break;
 
 				}
@@ -185,17 +192,30 @@ void *sf_malloc(size_t size) {
 		((sf_header*)bestFitHeader)->alloc = 1;
 		((sf_header*)bestFitHeader)->requested_size = size;
 		((sf_header*)bestFitHeader)->padding_size = padding;
+
 		if(splinterSize>=0 && splinterSize<32)
 		{
 			((sf_header*)bestFitHeader)->splinter_size = splinterSize;
 			if(splinterSize>0)
 			{
 				((sf_header*)bestFitHeader)->splinter = 1;
+				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks+splinterSize -8))->block_size=(sizeAndBlocks+splinterSize)>>4;
+				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks+splinterSize -8))->alloc = 1;
+				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks+splinterSize -8))->splinter = 1;
+				splinteredAdj += splinterSize;
+				splinteredB++; //splinteredBlock
+			}
+			else
+			{
+				((sf_header*)bestFitHeader)->splinter = 0;
 				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks -8))->block_size=sizeAndBlocks>>4;
 				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks -8))->alloc = 1;
-				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks -8))->splinter = 1;
+				((sf_footer*)( (char*) bestFitHeader+ sizeAndBlocks -8))->splinter = 0;
 			}
-
+			allocatedB++; //allocatedBlock
+			peakMemory+= ((sf_header*)bestFitHeader)->requested_size;
+			if(padding>0)
+			paddedAdj+=padding;//reason why I have it inside this is so I can search and see if they're in the right places, should only have2 add
 			sf_free_header* listToLoop = freelist_head;
 			while(listToLoop != NULL)
 			{
@@ -265,6 +285,10 @@ void *sf_malloc(size_t size) {
 			((sf_footer*)tmpAddr) -> block_size = splinterSize>>4;
 			tmpAddr = ((sf_free_header*)( ((char*)bestFitHeader) +sizeAndBlocks));
 
+			allocatedB++;
+			if(padding>0)
+				paddedAdj+=padding;
+			peakMemory+= ((sf_header*)bestFitHeader)->requested_size;
 			sf_free_header* listToLoop = freelist_head;
 			while(listToLoop != NULL)
 			{
@@ -444,9 +468,20 @@ void sf_free(void* ptr) {//ptr is at payload
 //	beginningPtr->alloc= 1;
 
 	//freelist_head = (sf_free_header*)beginningPtr; //added pointer back to free
+		allocatedB--;
+		if(beginningPtr->splinter_size>0)
+		{
+			splinteredB--;
+			splinteredAdj-=beginningPtr->splinter_size;
+		}
+		if(beginningPtr->padding_size>0)
+			paddedAdj-=beginningPtr->padding_size;
+		peakMemory-=beginningPtr->requested_size;
 
 		beginningPtr->splinter=0;
 		beginningPtr->splinter_size=0;
+		((sf_footer*) ((char*)beginningPtr +(beginningPtr->block_size<<4)-8))->splinter =0;
+
 		sf_free_header* listToLoop = freelist_head;
 		if(listToLoop == NULL)
 		{
@@ -480,7 +515,7 @@ void sf_free(void* ptr) {//ptr is at payload
 					beginningPtr->alloc = 0;
 					beginningPtr->splinter=0;
 					beginningPtr->splinter_size=0;
-
+					numCoalesce++;
 					if(listToLoop->next->next != NULL) //coaelsce both sides
 					{
 						listToLoop->next = listToLoop->next->next; //removing old frees that's part of this one
@@ -509,13 +544,14 @@ void sf_free(void* ptr) {//ptr is at payload
 					beginningPtr->alloc = 0;
 					beginningPtr->splinter=0;	//too tired to check what doesn't need to be here or If I'm running duplicate calls
 					beginningPtr->splinter_size=0;
+					numCoalesce++;
 					return;
 				}
 
 
 			} //back is either null, or cannot coaelsce
 			else if(listToLoop == (sf_free_header*)frontBlock)
-			{//coaelsce the front block with beginningPtr   so  |beginPtrhdr|beginPtrftr|frontBlock|
+			{//coaelsce the front block with beginningPtr   so  |beginPtrhdr|beginPtrftr|frontBlock| to |begin | frontBlock ftr
 
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->block_size = 0; //remove old fotoer
 				((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc = 0;
@@ -535,7 +571,19 @@ void sf_free(void* ptr) {//ptr is at payload
 				if(listToLoop->next !=NULL)
 					listToLoop->next->prev = (sf_free_header*)beginningPtr;
 				((sf_header*)listToLoop)->block_size=0; //make current block part of beginningPtr
-				((sf_footer*) ((char*)listToLoop +(((sf_header*)listToLoop)->block_size<<4) -8))->block_size=0; //make current footer 0
+//				((sf_footer*) ((char*)listToLoop +(((sf_header*)listToLoop)->block_size<<4) -8))->block_size=0; //make current footer 0
+				numCoalesce++;
+				listToLoop = (sf_free_header*)beginningPtr;
+				if(listToLoop->prev == NULL && listToLoop ->next == NULL) //one thing inside list
+				{
+					freelist_head= (sf_free_header*)beginningPtr;
+				}
+				while(listToLoop->prev!=NULL) //go find the beginning of the pointer after moving it,only happens in front of list
+						{
+							listToLoop = listToLoop->prev;
+						}
+						freelist_head = listToLoop;
+						return;
 				return;
 
 			}
@@ -569,6 +617,7 @@ void sf_free(void* ptr) {//ptr is at payload
 					else //not null, have back ptr
 					{
 						((sf_free_header*)beginningPtr)->prev =  listToLoop->prev;
+						((sf_free_header*)beginningPtr)->next = listToLoop;
 						listToLoop->prev->next = ((sf_free_header*)beginningPtr);
 						listToLoop->prev = (sf_free_header*)beginningPtr;
 						return;
@@ -582,6 +631,7 @@ void sf_free(void* ptr) {//ptr is at payload
 					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->alloc =0;
 					((sf_footer*)((char*)beginningPtr + (beginningPtr->block_size<<4) - 8))->splinter =0;
 					((sf_free_header*)beginningPtr)->next = NULL;
+					((sf_free_header*)beginningPtr)->prev = listToLoop;
 					listToLoop->next = (sf_free_header*)beginningPtr;
 					return;
 
@@ -596,5 +646,15 @@ void sf_free(void* ptr) {//ptr is at payload
 
 int sf_info(info* ptr) {
 	//0 success, -1 failure
+	if(ptr != NULL)
+	{
+		ptr->allocatedBlocks = allocatedB;
+		ptr->splinterBlocks = splinteredB;
+		ptr->padding = paddedAdj; //paddedAdjustments
+		ptr->splintering = splinteredAdj;
+		ptr->coalesces = numCoalesce;
+		ptr->peakMemoryUtilization = peakMemory/((double)numPages*4096); //payload total / total heap size, which is numPages*4096
+		return 0;
+	}
 	return -1;
 }
