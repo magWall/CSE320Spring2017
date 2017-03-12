@@ -17,6 +17,12 @@ sf_free_header* freelist_head = NULL;
 void* addrPtr = NULL; // addressPointer at the beginning of heap
 void* sbrkPtr = NULL;
 int numPages = 0;
+size_t allocatedB = 0;
+size_t splinteredB =0;
+size_t paddedAdj = 0;
+size_t splinteredAdj=0;
+size_t numCoalesce = 0;
+double peakMemory = 0;
 void *sf_malloc(size_t size) {
 	if(size==0)
 	{
@@ -621,7 +627,12 @@ int sf_info(info* ptr) {
 	//0 success, -1 failure
 	if(ptr != NULL)
 	{
-
+		ptr->allocatedBlocks = allocatedB;
+		ptr->splinterBlocks = splinteredB;
+		ptr->padding = paddedAdj; //paddedAdjustments
+		ptr->splintering = splinteredAdj;
+		ptr->coalesces = numCoalesce;
+		ptr->peakMemoryUtilization = peakMemory; //payload total / total heap size, which is numPages*4096
 		return 0;
 	}
 	return -1;
