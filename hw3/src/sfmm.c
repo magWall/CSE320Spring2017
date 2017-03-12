@@ -358,87 +358,28 @@ void *sf_realloc(void *ptr, size_t size) {
 		errno= ENOMEM;
 		return NULL;
 	}
-
-	sf_free_header* bestFitHeader = NULL;
-		while(numPages<5 && bestFitHeader == NULL)
+	sf_header* prevPtr = ((sf_header*) (char*)ptr - 8);
+	int padding = 16- size%16;
+	int sizeAndBlocks= size;
+	sizeAndBlocks+=padding+16;//16 for header + footer
+	if(prevPtr->block_size<<4 <sizeAndBlocks) //if true, allocate outside, make block smaller, coalesce if free on other side
 	{
 
-		sf_free_header* listToLoop = freelist_head;
-		while(listToLoop->next != NULL)
-		{
-			if(bestFitHeader == NULL)
-			{
-				if( ((sf_header*)listToLoop)->block_size<<4 >= size) //if fits sizeAndBlock's requirement, set to sizeAndBlocks
-				{
-					bestFitHeader = listToLoop;
-				}
-			}
-			else if( ((sf_header*)listToLoop)->block_size<<4 >= size &&((sf_header*)listToLoop)->block_size < ((sf_header*)bestFitHeader)->block_size)
-				bestFitHeader = listToLoop; //assign if this mem is lower than prev. free block (best fit)
-			else if( ((sf_header*)listToLoop)->block_size<<4 >= size &&((sf_header*)listToLoop)->block_size == ((sf_header*)bestFitHeader)->block_size)
-				if(listToLoop<bestFitHeader)//if the blocksize is the same, get lower address
-					bestFitHeader =listToLoop;
-			listToLoop = listToLoop->next; //go to next iteration
-
-		}
-		//if we break out of loop and bestFitHeader is still null, we must add a page and coaelsce
-		if(numPages+1 <5 && bestFitHeader == NULL)
-		{
-			numPages++;
-			addrPtr = sf_sbrk(4096);
-			sbrkPtr = (char*)addrPtr +4096;
-			//coaelsce here with address of last free
-			sf_free_header* listToLoop = freelist_head;
-			int tmpBool=0; //false not found
-			while(listToLoop != NULL)
-			{
-				if( ((char*)listToLoop+ ((sf_header*)listToLoop)->block_size)==addrPtr ) //if address is the same
-				{
-					//coaelsce if found, bool is true
-					((sf_footer*)((char*)listToLoop+ ((sf_header*)listToLoop)->block_size))->block_size=0; //remove old block size
-					((sf_header*)listToLoop)->block_size= ((((sf_header*)listToLoop)->block_size<<4) +4096 )>>4; //add new block size
-					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->block_size = ((sf_header*)listToLoop)->block_size; //update new blocksize
-					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->alloc=((sf_header*)listToLoop)->alloc;
-					((sf_footer*)((char*)listToLoop) + (((sf_header*)listToLoop)->block_size<<4) - 8)->splinter=((sf_header*)listToLoop)->splinter;
-					tmpBool = 1;
-					break;
-
-				}
-				listToLoop = listToLoop->next;
-			}
-			//if last block is allocated, then it won't appear in free list, then bool is false and we add new page
-			if(tmpBool==0)
-			{
-				//add new page of memory
-				sf_header* sfheaderPtr = (sf_header*) addrPtr;
-				sfheaderPtr->alloc= 0;
-				sfheaderPtr->splinter = 0;
-				sfheaderPtr->block_size= 4096>>4; //shared 32 bits with alloc and splinter
-				//sfheaderPtr->unused_bits ignore unused unless realloc, set0
-				sfheaderPtr->requested_size=0;
-				sfheaderPtr->splinter_size=0; //originally, new page = no splinter, else is blockSize-sizeAndblocks
-				sfheaderPtr->padding_size=0;
-
-				sf_footer* sffooterPtr = (sf_footer*) ((char*)sbrkPtr-8);//get beginning of struct footer, then cast into footer
-				sffooterPtr->alloc = 0;
-				sffooterPtr->splinter=0;
-				sffooterPtr->block_size=4096>>4;//header and footer included in block size, shared with alloc + splinter
-				((sf_free_header*)sfheaderPtr)->next=freelist_head;
-				freelist_head->prev = (sf_free_header*) sfheaderPtr;
-				freelist_head = (sf_free_header*) sfheaderPtr; // move list to head
-
-			}
-		}
-		else if(numPages+1>=5 && bestFitHeader == NULL) //condition cannot allow you to loop any further
-			break;
+	}
+	else if( ((sf_header*)((char*)prevPtr + (prevPtr->block_size<<4)))->alloc ==0)
+	//check if block next to it can be used to increase space, then coalesce if possible
+	{
 
 	}
-		if(bestFitHeader == NULL)
-		{
-			errno = ENOMEM; // numPages > 5 and still cannot find page for blocks given
-			return NULL;
-		}
-		//return bestFitHeader
+	else if( ((sf_footer*)((char*)prevPtr-8))->alloc ==0)
+	{
+
+	}
+	else //allocate into free block
+	{
+		sf_malloc(size);
+		sf_free(ptr);
+	}
 	return NULL;
 }
 
