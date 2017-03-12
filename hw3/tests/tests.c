@@ -94,7 +94,7 @@ Test(sf_memsuite, error_throwing, .init = sf_mem_init, .fini = sf_mem_fini)
 Test(sf_memsuite, sf_info_works, .init = sf_mem_init, .fini = sf_mem_fini)
 {
    //   sf_header* y = ((sf_header*) ((char*)varY -8));
-   info* ptr = sf_malloc(sizeof(info));
+   info* ptr = (info*)(sf_malloc(sizeof(info)));
    int work = sf_info(ptr);
    cr_assert(work== 0,"sf_info exists");
 
@@ -104,7 +104,7 @@ Test(sf_memsuite, sf_info_works, .init = sf_mem_init, .fini = sf_mem_fini)
    cr_assert(t==ptr->allocatedBlocks,"1 blocks allocated");
   /* sf_info(ptr);
    size_t p2= ptr->allocatedBlocks;   This block of code doesn't want to print 2 and crashes instead even though it equals to 2...
-   t = 2;
+   t = 2;                             probably has to do with malloc.
 printf("\n Ptr->allocatedBlocks is %zd \n",ptr->allocatedBlocks);
    cr_assert(p2==t,"2 blocks allocated");
    free(varY);
