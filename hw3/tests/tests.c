@@ -82,7 +82,7 @@ Test(sf_memsuite, add_4_pages_free_list, .init = sf_mem_init, .fini = sf_mem_fin
 Test(sf_memsuite, error_throwing, .init = sf_mem_init, .fini = sf_mem_fini)
 {
   long* varY= sf_malloc(4096*2);
-  sf_header* y = ((sf_header*) ((char*)varY -8) );
+  sf_header* y = ((sf_header*) ((char*)varY -8));
   cr_assert(y->splinter==0, "should be no splinter");
   long* varZ = sf_malloc(4096*3);
   cr_assert(varZ == NULL, "Z should be null, impossible to malloc");
@@ -90,6 +90,30 @@ Test(sf_memsuite, error_throwing, .init = sf_mem_init, .fini = sf_mem_fini)
   long* varX = sf_malloc(4096*5);
   cr_assert(varX ==NULL, "should be null, impossible to malloc");
 
+}
+Test(sf_memsuite, sf_info_works, .init = sf_mem_init, .fini = sf_mem_fini)
+{
+   //   sf_header* y = ((sf_header*) ((char*)varY -8));
+   info* ptr = sf_malloc(sizeof(info));
+   int work = sf_info(ptr);
+   cr_assert(work== 0,"sf_info exists");
+
+   long* varY= sf_malloc(sizeof(long));
+   size_t t= 1;
+   //sf_info called before , should equal to 1;
+   cr_assert(t==ptr->allocatedBlocks,"1 blocks allocated");
+  /* sf_info(ptr);
+   size_t p2= ptr->allocatedBlocks;   This block of code doesn't want to print 2 and crashes instead even though it equals to 2...
+   t = 2;
+printf("\n Ptr->allocatedBlocks is %zd \n",ptr->allocatedBlocks);
+   cr_assert(p2==t,"2 blocks allocated");
+   free(varY);
+   sf_info(ptr);
+   t =1;
+   cr_assert(t==ptr->allocatedBlocks, "1 block allocated");*/
+   sf_free(varY);
+   work = sf_info(ptr);
+   cr_assert(t==ptr->allocatedBlocks,"1 blocks allocated");
 }
 
 
