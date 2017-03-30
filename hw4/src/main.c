@@ -1,4 +1,4 @@
-#include "sfish.c"
+#include "sfish.h"
 #include "debug.h"
 
 /*
@@ -17,8 +17,8 @@ int main(int argc, char const *argv[], char* envp[]){
         /* All your debug print statements should use the macros found in debu.h */
         /* Use the `make debug` target in the makefile to run with these enabled. */
         info("Length of command entered: %ld\n", strlen(cmd));
-        int x;
-        if( (x= isValidCmd(cmd))!=-1 )
+        int x= isValidCmd(cmd);
+        if( x!=-1 )
         {
             if(x==1)
                 cmdCd();

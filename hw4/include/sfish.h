@@ -8,4 +8,14 @@
 #include <string.h>
 #include <string.h>
 
+
+int isValidCmd(char* cmd);
+void unix_error(char* msg);
+pid_t Fork(void);
+void cmdCd();
+
+void cmdHelp();
+
+void cmdPwd();
+char** strSplit(char* line, const char delimiter);
 #endif
