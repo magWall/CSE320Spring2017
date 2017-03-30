@@ -4,11 +4,17 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-int isValidCmd(char* cmd){
+int isValidCmd(char** words){
+char* cmd = *words;
 if(strcmp(cmd,"cd")==0)
 	return 1;
-else if(strcmp(cmd,"help")==0)
+else if(strcmp(cmd,"help")==0) //only 1 argument
+{
+	if( *(words+1)!= NULL)
+		return -1;
 	return 2;
+}
+
 else if(strcmp(cmd,"pwd") ==0)
 	return 3;
 return -1;
@@ -28,7 +34,7 @@ pid_t Fork(void)
 	return pid;
 }
 
-void cmdCd()
+void cmdCd(char** words)
 {
 
 }

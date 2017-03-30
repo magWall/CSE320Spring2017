@@ -9,10 +9,10 @@
 #include <string.h>
 
 
-int isValidCmd(char* cmd);
+int isValidCmd(char** words);
 void unix_error(char* msg);
 pid_t Fork(void);
-void cmdCd();
+void cmdCd(char** words);
 
 void cmdHelp();
 
