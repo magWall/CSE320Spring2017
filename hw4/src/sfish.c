@@ -78,7 +78,7 @@ void cmdPwd()
 
 }*/
 
-char** strSplit(char* line, const char delimiter) //split string into str array, or char** and malloc.
+char** strSplit(char* line,char* tokenDelimiter) //split string into str array, or char** and malloc.
 {
 	int outputBufferSize = 256; //set a good buffer size
 	char** tmpResult = malloc(sizeof(char*)*outputBufferSize);
@@ -87,9 +87,9 @@ char** strSplit(char* line, const char delimiter) //split string into str array,
 		printf("FAILED TO MALLOC WHEN PARSING.");
 		exit(1); //I believe 1 is for failure, 0 is EXIT_SUCCESS
 	}
-	char* tokenDelimiter = NULL; //for strTok
-	*tokenDelimiter = delimiter;
-	*(tokenDelimiter+1)=0; //null character to make it only grab delimiter
+//	char* tokenDelimiter="  "; //for strTok
+//	*tokenDelimiter = (char)delimiter;
+//	*(tokenDelimiter+1)=0; //null character to make it only grab delimiter
 	char* word;
 	int tmpCount=0;
 

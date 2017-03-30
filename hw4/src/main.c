@@ -17,18 +17,21 @@ int main(int argc, char const *argv[], char* envp[]){
         /* All your debug print statements should use the macros found in debu.h */
         /* Use the `make debug` target in the makefile to run with these enabled. */
         info("Length of command entered: %ld\n", strlen(cmd));
-    char** words = strSplit(cmd,' ');
+        char* delimiter =" ";
+    char** words = strSplit(cmd,delimiter);
         int x= isValidCmd(words);
         if( x!=-1 )
         {
             if(x==1)
-                cmdCd();
+                cmdCd(words);
             else if(x==2)
                 cmdHelp();
             else if(x==3)
                 cmdPwd();
             //asdasd
         }
+        else if(x==-1)
+            printf("Invalid command, use help.\n");
 
         /* You WILL lose points if your shell prints out garbage values. */
     free(words);

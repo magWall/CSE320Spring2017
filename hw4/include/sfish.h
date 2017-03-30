@@ -17,5 +17,5 @@ void cmdCd(char** words);
 void cmdHelp();
 
 void cmdPwd();
-char** strSplit(char* line, const char delimiter);
+char** strSplit(char* line,char* delimiter);
 #endif
