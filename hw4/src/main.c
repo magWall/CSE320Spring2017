@@ -1,4 +1,4 @@
-#include "sfish.h"
+#include "sfish.c"
 #include "debug.h"
 
 /*
@@ -10,13 +10,25 @@ int main(int argc, char const *argv[], char* envp[]){
     rl_catch_signals = 0;
     /* This is disable readline's default signal handlers, since you are going to install your own.*/
     char *cmd;
-    while((cmd = readline("sfish> ")) != NULL) {
+    while((cmd = readline("<kennylee> :")) != NULL) {
         if (strcmp(cmd, "exit")==0)
             break;
         printf("%s\n",cmd);
         /* All your debug print statements should use the macros found in debu.h */
         /* Use the `make debug` target in the makefile to run with these enabled. */
         info("Length of command entered: %ld\n", strlen(cmd));
+        int x;
+        if( (x= isValidCmd(cmd))!=-1 )
+        {
+            if(x==1)
+                cmdCd();
+            else if(x==2)
+                cmdHelp();
+            else if(x==3)
+                cmdPwd();
+            //asdasd
+        }
+
         /* You WILL lose points if your shell prints out garbage values. */
     }
 
