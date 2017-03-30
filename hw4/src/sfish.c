@@ -44,28 +44,40 @@ void parseCmd(char* cmd)
 }
 char** strSplit(char* line, const char delimiter) //split string into str array, or char** and malloc.
 {
-	char** tmpResult = malloc(sizeof(tmpResult));;
+	int outputBufferSize = 256; //set a good buffer size
+	char** tmpResult = malloc(sizeof(char*)*outputBufferSize);
+	if(tmpResult == NULL) //failed to malloc
+	{
+		printf("FAILED TO MALLOC WHEN PARSING.");
+		exit(1); //I believe 1 is for failure, 0 is EXIT_SUCCESS
+	}
 	char* tokenDelimiter; //for strTok
 	*tokenDelimiter = delimiter;
 	*(tokenDelimiter+1)=0; //null character to make it only grab delimiter
 	char* word;
 	int tmpCount=0;
+
 	word = strtok(line,tokenDelimiter);//may have to check for delimiter same spaces
 	if(word!=NULL && strlen(word)!=0)
 	{
-		tmpResult= realloc(tmpResult,sizeof(tmpResult)+	sizeof(word));
-		if(tmpResult == NULL)
-			return NULL;
 		*(tmpResult+tmpCount)=word;
 		tmpCount++;
 	}
 
 	while(word!=NULL)
 	{
+		if(tmpCount>outputBufferSize) //increase size of malloc
+		{
+			outputBufferSize+= 256;
+			tmpResult= realloc(tmpResult,sizeof(char*)*outputBufferSize);
+			if(tmpResult ==NULL)
+			{
+				printf("FAILED TO REALLOC WHEN PARSING.");
+				exit(1); //I believe 1 is for failure, 0 is EXIT_SUCCESS
+			}
+		}
+
 		word = strtok(NULL,tokenDelimiter);
-		tmpResult= realloc(tmpResult,sizeof(tmpResult)+	sizeof(word));
-		if(tmpResult == NULL) //realloc  no space
-			return NULL;
 		*(tmpResult+tmpCount)=word;
 		tmpCount++;
 	}
