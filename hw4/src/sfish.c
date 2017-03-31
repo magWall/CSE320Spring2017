@@ -106,6 +106,7 @@ void cmdCd(char** words)
 			}
 			else if( 2 == errno)
 			{
+				setenv("PWD",oldpwdPath,1); //to fix strtok
 				perror("Invalid path or directory.");
 				//printf("Invalid Path");
 			}
