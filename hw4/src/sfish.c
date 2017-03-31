@@ -55,28 +55,60 @@ void cmdCd(char** words)
 			//go back one path and check if file exists
 			char* pwdPath = getenv("PWD");
 			debug("PWD: %s\n",pwdPath);
+
+			char oldPWD[256];//oldpwd buffer
+			oldPWD[0]=0;
+			char* oldpwdPath= oldPWD;
+			strcpy(oldpwdPath,pwdPath);
+			debug("PWD: %s\n",oldpwdPath);
+
 			char* splitToken= "/";
 			char** returnedPath = strSplit(pwdPath,splitToken);
 			int idx=1; //can't go back to prev directory if there's no previous directory.
 			char buffer[256];
 			buffer[0]= 0; //make buffer set to 0 so strcat will not be affected.
-			char* newPath = buffer; //    0 1 2 3
-			strcat(newPath,"/");
-			strcat(newPath, *returnedPath);
-			debug("newPath: %s\n",newPath);
 
-			while( *(returnedPath+idx+1)!=NULL)
+			char* newPathPtr = buffer; //    0 1 2 3
+			strcat(newPathPtr,"/");
+			strcat(newPathPtr, *returnedPath);
+			debug("newPath: %s\n",newPathPtr);
+//			debug("pwdPath: %s\n",pwdPath); //path got destroyed by calling tok
+			while( *(returnedPath+idx+1)!=NULL) //getting directory before
 			{
 				debug("path:%s\n",*(returnedPath+idx));
-				strcat(newPath,"/");
-				strcat(newPath,*(returnedPath+idx));
+				strcat(newPathPtr,"/");
+				strcat(newPathPtr,*(returnedPath+idx));
 			//	debug("newPath: %s\n",newPath);
 				idx++;
 			}
-			chdir(newPath);
-			setenv("PWD",newPath,1);//overwrite old path
-			debug("newPath final:%s\n",newPath);
-			debug("PWD: %s\n",getenv("PWD"));
+			idx = 1;
+			debug("newPath: %s\n",newPathPtr);
+//			debug("pwdPath: %s\n",pwdPath); //path got destroyed by calling tok
+
+			idx = 2;
+			int lenPwd = strlen(newPathPtr);
+			//debug("strlen of %s is %d\n",buffer, lenPwd);
+			while( *(*(words+1)+idx)!=0 )//getting next input directory
+			{
+				*(newPathPtr+lenPwd+idx-2) = *(*(words+1)+idx);
+				idx++;
+			}
+			DIR* tmpDir = opendir(newPathPtr);
+			if(tmpDir !=NULL)
+			{
+				debug("oldPwd:%s\n",oldpwdPath);
+				setenv("OLDPWD",oldpwdPath,1);
+				chdir(newPathPtr);
+				setenv("PWD",newPathPtr,1);//overwrite old path
+				debug("newPath final:%s\n",newPathPtr);
+				debug("PWD: %s\n",getenv("PWD"));
+				debug("OLPWD%s\n",getenv("OLDPWD"));
+			}
+			else if( 2 == errno)
+			{
+				perror("Invalid path or directory.");
+				//printf("Invalid Path");
+			}
 		}
 		else if( strncmp(*(words+1),".",1)==0 ) //current directory
 		{
@@ -106,10 +138,10 @@ void cmdCd(char** words)
 				setenv("PWD",newPathPtr,1);
 
 			}
-			else if(ENONET == errno)//tmpDir doesn't exist, invalid directory
+			else if(2 == errno)//tmpDir doesn't exist, invalid directory
 			{
 				perror("Invalid directory");
-				printf("Invalid directory."); //to stdout for ease of seeing
+			//	printf("Invalid directory."); //to stdout for ease of seeing
 			}
 
 
@@ -118,7 +150,7 @@ void cmdCd(char** words)
 		else //cd something
 		{
 			char* pwdPath = getenv("PWD");
-
+			//one case where if you pass in a fake directory, your oldpwd may mess up
 			char newPath[256];
 			char* newPathPtr = newPath;
 			strcpy(newPathPtr,pwdPath);
@@ -137,10 +169,10 @@ void cmdCd(char** words)
 				debug("CurrDir: %s\n",getenv("PWD"));
 				debug("OPWD: %s\n",getenv("OLDPWD"));
 			}
-			else if(ENONET == errno)
+			else if(2 == errno) //google said 2 = invalid nonexistent directory
 			{
 				perror("Invalid directory.");
-				printf("Invalid directory."); //to stdout for ease of seeing
+				//printf("Invalid directory."); //to stdout for ease of seeing
 			}
 			//same as  . , check if there's a path to there
 			//check if path exists to there, if it does, change to that directory
