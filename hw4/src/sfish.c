@@ -39,7 +39,7 @@ pid_t Fork(void)
 void cmdCd(char** words)
 {
 
-	if(*(words+1)!=NULL)
+	if(*(words+1)!=NULL) //if not just cd
 	{
 		if(  strcmp(*(words+1),"-")==0 ) //go back prev directory
 		{
@@ -80,28 +80,67 @@ void cmdCd(char** words)
 		}
 		else if( strncmp(*(words+1),".",1)==0 ) //current directory
 		{
-
 			//read whole path, if file exist, go to that path
-		}	//
-
-		else
-		{
 			char* pwdPath = getenv("PWD");
-			strcat(pwdPath,"/");
-			strcat(pwdPath,*(words+1));
+			char newPath[256];
+			char* newPathPtr = newPath;
+			strcpy(newPathPtr,pwdPath);
+
+
+			int lenPwd= strlen(pwdPath);
+			int idx =1;
+			while( *(*(words+1)+idx)!=0 )
+			{
+				*(newPathPtr+lenPwd+idx-1) = *(*(words+1)+idx);
+				idx++;
+			}
+			*(pwdPath+lenPwd+idx-1) =0; //add null terminator
+			debug("Prev:%s\n",pwdPath);
+			debug("Next PWD:%s\n",newPathPtr);
 			DIR* tmpDir = opendir(pwdPath);
-			if(tmpDir!=NULL)
+			if(tmpDir!=NULL) //if you can't open the directory, then it doesn't exist
 			{
 				closedir(tmpDir);
-				chdir(pwdPath);
-				char* oldpwdPath = getenv("PWD");
-				setenv("PWD",pwdPath,1);
-				setenv("OLDPWD",oldpwdPath,1);
-				//debug("PWD: %s\n",getenv("PWD"));
+				chdir(newPathPtr);
+				setenv("OLDPWD",pwdPath,1);
+				setenv("PWD",newPathPtr,1);
+
+			}
+			else if(ENONET == errno)//tmpDir doesn't exist, invalid directory
+			{
+				perror("Invalid directory");
+				printf("Invalid directory."); //to stdout for ease of seeing
+			}
+
+
+		}	//
+
+		else //cd something
+		{
+			char* pwdPath = getenv("PWD");
+
+			char newPath[256];
+			char* newPathPtr = newPath;
+			strcpy(newPathPtr,pwdPath);
+			strcat(newPathPtr,"/");
+			strcat(newPathPtr,*(words+1));
+			debug("pwd %s\n",newPathPtr);
+			debug("pwd %s\n",pwdPath);
+			DIR* tmpDir = opendir(newPathPtr);
+			if(tmpDir!=NULL)
+			{
+
+				setenv("OLDPWD",pwdPath,1);
+				closedir(tmpDir);
+				chdir(newPathPtr);
+				setenv("PWD",newPathPtr,1);
+				debug("CurrDir: %s\n",getenv("PWD"));
+				debug("OPWD: %s\n",getenv("OLDPWD"));
 			}
 			else if(ENONET == errno)
 			{
-				perror("Invalid directory");
+				perror("Invalid directory.");
+				printf("Invalid directory."); //to stdout for ease of seeing
 			}
 			//same as  . , check if there's a path to there
 			//check if path exists to there, if it does, change to that directory
@@ -110,16 +149,19 @@ void cmdCd(char** words)
 	else // it's just cd
 	{
 		char* pwdPath = getenv("PWD");
-		debug("PWD: %s\n",pwdPath);
+//		debug("PWD: %s\n",pwdPath);
+		setenv("OLDPWD",pwdPath,1);
 		char* envirHome = getenv("HOME"); //path to home if this directory
 		chdir(envirHome);//change directory to home
 		setenv("PWD",envirHome,1); //1 to overwrite
-		pwdPath = getenv("PWD");
-		debug("PWD(home): %s\n",pwdPath);
-		char* user = getenv("USER");
-		debug("user: %s\n",user);
-		char* term = getenv("TERM");
-		debug("term: %s\n",term);
+		//pwdPath = getenv("PWD");
+		//debug("PWD(home): %s\n",pwdPath);
+		//char* oldPWD = getenv("OLDPWD");
+		//debug("OLDPWD:%s\n",oldPWD);
+		//char* user = getenv("USER");
+		//debug("user: %s\n",user);
+		//char* term = getenv("TERM");
+		//debug("term: %s\n",term);
 
 
 	}
