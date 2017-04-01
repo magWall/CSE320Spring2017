@@ -44,6 +44,8 @@ int main(int argc, char const *argv[], char* envp[]){
                 cmdLs();
             else if(x==5)
                 cmdExecutable(words);
+             else if(x==6)
+                cmdNotRelative(words);
             //asdasd
         }
         else if(x==-1)

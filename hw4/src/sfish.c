@@ -8,6 +8,7 @@
 
 int isValidCmd(char** words){
 char* cmd = *words;
+
 if(strcmp(cmd,"cd")==0)
 	return 1;
 else if(strcmp(cmd,"help")==0) //only 1 argument
@@ -18,11 +19,12 @@ else if(strcmp(cmd,"help")==0) //only 1 argument
 }
 else if(strcmp(cmd,"pwd") ==0)
 	return 3;
-else if(strcmp(cmd,"ls")==0)
+else if(strcmp(cmd,"ls")==0) //test for ls
 	return 4;
 else if(strstr(cmd,"/")!=0) //relative bin/whatever
 	return 5;
-return -1;
+else //assumes exists inside call
+	return 6;
 }
 void unix_error(char* msg)
 {
@@ -38,6 +40,38 @@ pid_t Fork(void)
 	}
 	return pid;
 }
+void cmdNotRelative(char** words)
+{
+		int argsLen = 0;
+		while( *(words+argsLen)!=0)
+			argsLen++;
+		char* args[argsLen+1];//+1 for null
+		char somechar[256] = "/bin/";
+		strcat(somechar, *words);
+        args[0] = somechar; //executable needs keyvalue, filename with args, and filename path
+        debug("%s\n",args[0]);
+        int idx =1;
+        while( *(words+idx)!=0) //for args -i -r -etc
+		{
+			args[idx]=*(words+idx);
+			idx++;
+		}
+		args[argsLen+1]=NULL;
+        char* paths = getenv("PATH");
+    	char* delimiter2 = ":";
+    	char** allDir = strSplit(paths, delimiter2);
+
+        pid_t pid = Fork();
+        int status;
+	if(pid ==0)
+	{
+       	execve(args[0],args,allDir);//path, arg
+       	perror("failed");
+		exit(EXIT_SUCCESS);
+	}
+	wait(&status);
+
+}
 void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 {
 	int argsLen = 0;
@@ -45,7 +79,7 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 		argsLen++;
 	char* args[argsLen+1];//+1 for null
 	//args[0]= "/";
-	args[0]=strcat("/",*words); //can't concatenate strings.
+	args[0]= *words;
 
 	debug("%s\n",args[0]);
 	int idx = 1;
@@ -53,6 +87,7 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 	while( *(words+idx)!=0) //for args -i -r -etc
 	{
 		args[idx]=*(words+idx);
+		idx++;
 	}
 	args[argsLen+1]=NULL;
 //	char* envp[2];
@@ -60,7 +95,6 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 
 	char* paths = getenv("PATH");
     char* delimiter2 = ":";
-  //  strcat(envp[0],getenv("PWD"));
     char** allDir = strSplit(paths, delimiter2);
 
 
@@ -71,14 +105,12 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 	{
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
-       	free(args[0]);
 		exit(EXIT_SUCCESS);
 	}
 	wait(&status);
-	free(args[0]);
 
 }
-void cmdLs()
+void cmdLs() //test for ls to see if it works
 {
 	  /*  char* delimiter2 = ":";
         char* paths = getenv("PATH");
@@ -97,7 +129,7 @@ void cmdLs()
         args[0] = "/bin/ls"; //executable needs keyvalue, filename with args, and filename path
         args[1] = NULL;
         char* envp[2];
-        envp[0] = "PATH=/bin";
+        envp[0] = "/bin";
         envp[1] = NULL;
 
         pid_t pid = Fork();
