@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <debug.h>
 #include <dirent.h>
+#include <fcntl.h>           /* Definition of AT_* constants */
+#include <sys/stat.h>
 
 int isValidCmd(char** words){
 char* cmd = *words;
@@ -65,6 +67,13 @@ void cmdNotRelative(char** words)
         int status;
 	if(pid ==0)
 	{
+
+		 struct stat tmpStat; //check exists
+    	if(stat(args[0],&tmpStat) ==0)
+    	{
+    		perror("File Does Not Exist");
+    		exit(EXIT_FAILURE);
+    	}
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
 		exit(EXIT_SUCCESS);
@@ -96,6 +105,7 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 	char* paths = getenv("PATH");
     char* delimiter2 = ":";
     char** allDir = strSplit(paths, delimiter2);
+   ;
 
 
 //	envp[1] = NULL;
@@ -103,6 +113,12 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
     int status;
 	if(pid ==0)
 	{
+		 struct stat tmpStat;
+    	if(stat(args[0],&tmpStat) ==0)
+    	{
+    		perror("File Does Not Exist");
+    		exit(EXIT_FAILURE);
+    	}
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
 		exit(EXIT_SUCCESS);
