@@ -44,10 +44,15 @@ void cmdCd(char** words)
 		if(  strcmp(*(words+1),"-")==0 ) //go back prev directory
 		{
 			char* oldpwdPath = getenv("OLDPWD");
-			char* pwdPath = getenv("PWD");
-			chdir(oldpwdPath);
-			setenv("PWD",oldpwdPath,1); //overwrite prev. working directory.
-			setenv("OLDPWD",pwdPath,1);
+			if( strcmp(oldpwdPath,"")!=0 )
+			{
+				char* pwdPath = getenv("PWD");
+				chdir(oldpwdPath);
+				setenv("PWD",oldpwdPath,1); //overwrite prev. working directory.
+				setenv("OLDPWD",pwdPath,1);
+			}
+			else
+				printf("OLDPWD not set.");
 
 		}	//
 		else if(strncmp(*(words+1),"..",2)==0)

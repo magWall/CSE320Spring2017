@@ -21,6 +21,7 @@ int main(int argc, char const *argv[], char* envp[]){
     *(displays+len2+1)=' ';
     *(displays+len2+2)= '$';
     *(displays+len2+3)= 0;
+    setenv("OLDPWD","",1);
     while((cmd = readline(displays)) != NULL) {
         if (strcmp(cmd, "exit")==0)
             break;
@@ -43,6 +44,11 @@ int main(int argc, char const *argv[], char* envp[]){
         }
         else if(x==-1)
             printf("Invalid command, use help.\n");
+
+        //char* delimiter2 = ":";
+       // char* paths = getenv("PATH");
+       // debug("%s \n",);
+       // char** allDir = strSplit(paths, delimiter2);
 
         /* You WILL lose points if your shell prints out garbage values. */
         free(words);
