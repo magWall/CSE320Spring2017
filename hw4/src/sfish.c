@@ -19,6 +19,8 @@ else if(strcmp(cmd,"help")==0) //only 1 argument
 
 else if(strcmp(cmd,"pwd") ==0)
 	return 3;
+else if(strcmp(cmd,"ls")==0)
+	return 4;
 return -1;
 }
 void unix_error(char* msg)
@@ -35,7 +37,45 @@ pid_t Fork(void)
 	}
 	return pid;
 }
+void cmdLs()
+{
+	  /*  char* delimiter2 = ":";
+        char* paths = getenv("PATH");
+        debug("%s \n",paths);
+        char** allDir = strSplit(paths, delimiter2);
+        int idxDir =0;
+        while(*(allDir+idxDir)!=0)
+        {
+        	debug("%s\n",*(allDir+idxDir));
+        	idxDir++;
 
+        }*/
+        char* args[2];
+        args[0] = "/bin/ls";
+        args[1] = NULL;
+     //   char* lsThing = "ls";
+        char* envp[2];
+        envp[0] = "PATH=/bin";
+        envp[1] = NULL;
+
+        pid_t pid = Fork();
+        int status;
+	if(pid ==0)
+	{
+
+        	execve("/bin/ls",args,envp);//path, arg
+        	perror("failed");
+//            printf("%s\n",*(allDir+idxDir));
+//            char* fileDir = *(allDir+idxDir);
+//            printf("%s\n",getenv(fileDir));
+
+
+		exit(EXIT_SUCCESS);
+	}
+	wait(&status);
+
+
+}
 void cmdCd(char** words)
 {
 

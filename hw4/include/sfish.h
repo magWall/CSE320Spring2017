@@ -15,7 +15,7 @@ pid_t Fork(void);
 void cmdCd(char** words);
 
 void cmdHelp();
-
+void cmdLs();
 void cmdPwd();
 char** strSplit(char* line,char* delimiter);
 #endif

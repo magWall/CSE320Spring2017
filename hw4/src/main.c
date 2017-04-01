@@ -40,15 +40,13 @@ int main(int argc, char const *argv[], char* envp[]){
                 cmdHelp();
             else if(x==3)
                 cmdPwd();
+            else if(x==4)
+                cmdLs();
             //asdasd
         }
         else if(x==-1)
             printf("Invalid command, use help.\n");
 
-        //char* delimiter2 = ":";
-       // char* paths = getenv("PATH");
-       // debug("%s \n",);
-       // char** allDir = strSplit(paths, delimiter2);
 
         /* You WILL lose points if your shell prints out garbage values. */
         free(words);
