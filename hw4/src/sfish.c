@@ -20,7 +20,7 @@ else if(strcmp(cmd,"pwd") ==0)
 	return 3;
 else if(strcmp(cmd,"ls")==0)
 	return 4;
-else if(strstr(cmd,"/")!=0) //relative
+else if(strstr(cmd,"/")!=0) //relative bin/whatever
 	return 5;
 return -1;
 }
@@ -38,14 +38,16 @@ pid_t Fork(void)
 	}
 	return pid;
 }
-void cmdExecutable(char** words) //runs through relative path ---- BROKEN
+void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 {
 	int argsLen = 0;
 	while( *(words+argsLen)!=0)
 		argsLen++;
 	char* args[argsLen+1];//+1 for null
-	args[0]= "/";
-	strcat(args[0],*words);
+	//args[0]= "/";
+	args[0]=strcat("/",*words); //can't concatenate strings.
+
+	debug("%s\n",args[0]);
 	int idx = 1;
 
 	while( *(words+idx)!=0) //for args -i -r -etc
@@ -53,21 +55,27 @@ void cmdExecutable(char** words) //runs through relative path ---- BROKEN
 		args[idx]=*(words+idx);
 	}
 	args[argsLen+1]=NULL;
+//	char* envp[2];
+//	envp[0] = "PATH=";
 
-	char* envp[2];
-	envp[0] = "PATH=";
-	strcat(envp[0],getenv("PWD")); //set relative path
-	strcat(envp[0],args[0]);
-	envp[1] = NULL;
+	char* paths = getenv("PATH");
+    char* delimiter2 = ":";
+  //  strcat(envp[0],getenv("PWD"));
+    char** allDir = strSplit(paths, delimiter2);
+
+
+//	envp[1] = NULL;
 	pid_t pid = Fork();
     int status;
 	if(pid ==0)
 	{
-       	execve(args[0],args,envp);//path, arg
+       	execve(args[0],args,allDir);//path, arg
        	perror("failed");
+       	free(args[0]);
 		exit(EXIT_SUCCESS);
 	}
 	wait(&status);
+	free(args[0]);
 
 }
 void cmdLs()
