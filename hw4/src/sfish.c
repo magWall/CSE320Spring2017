@@ -238,8 +238,27 @@ void cmdPwd()
 		if( (outputBuffer=malloc(size*sizeof(char*)) )!=NULL)
 		{
 			outputPtr =getcwd(outputBuffer,size); //get working directory, put into outputPtr
+			while(outputPtr == NULL && errno == ERANGE)
+			{
+				size+=256;
+				if( (outputBuffer=realloc(outputBuffer,size*sizeof(char*)) )!=NULL)
+				{
+					outputPtr =getcwd(outputBuffer,size);
+				}
+				else//handle getcwd failure
+				{
+					perror("Size for PWD failed, unable to get proper size.");
+					exit(EXIT_FAILURE);
+				}
+
+			}
 			fprintf(stdout,"%s\n",outputPtr);
 			free(outputBuffer);
+		}
+		else
+		{
+			perror("Malloc for PWD failed.");
+			exit(EXIT_FAILURE);
 		}
 		exit(EXIT_SUCCESS);
 	}
