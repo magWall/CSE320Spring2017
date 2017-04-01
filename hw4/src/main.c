@@ -42,6 +42,8 @@ int main(int argc, char const *argv[], char* envp[]){
                 cmdPwd();
             else if(x==4)
                 cmdLs();
+            else if(x==5)
+                cmdExecutable(words);
             //asdasd
         }
         else if(x==-1)

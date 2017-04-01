@@ -16,11 +16,12 @@ else if(strcmp(cmd,"help")==0) //only 1 argument
 		return -1;
 	return 2;
 }
-
 else if(strcmp(cmd,"pwd") ==0)
 	return 3;
 else if(strcmp(cmd,"ls")==0)
 	return 4;
+else if(strstr(cmd,"/")!=0) //relative
+	return 5;
 return -1;
 }
 void unix_error(char* msg)
@@ -37,11 +38,44 @@ pid_t Fork(void)
 	}
 	return pid;
 }
+void cmdExecutable(char** words) //runs through relative path ---- BROKEN
+{
+	int argsLen = 0;
+	while( *(words+argsLen)!=0)
+		argsLen++;
+	char* args[argsLen+1];//+1 for null
+	args[0]= "/";
+	strcat(args[0],*words);
+	int idx = 1;
+
+	while( *(words+idx)!=0) //for args -i -r -etc
+	{
+		args[idx]=*(words+idx);
+	}
+	args[argsLen+1]=NULL;
+
+	char* envp[2];
+	envp[0] = "PATH=";
+	strcat(envp[0],getenv("PWD")); //set relative path
+	strcat(envp[0],args[0]);
+	envp[1] = NULL;
+	pid_t pid = Fork();
+    int status;
+	if(pid ==0)
+	{
+       	execve(args[0],args,envp);//path, arg
+       	perror("failed");
+		exit(EXIT_SUCCESS);
+	}
+	wait(&status);
+
+}
 void cmdLs()
 {
 	  /*  char* delimiter2 = ":";
         char* paths = getenv("PATH");
-        debug("%s \n",paths);
+      bu
+      strcat(envp[0],getenv("PWD"));g("%s \n",paths);
         char** allDir = strSplit(paths, delimiter2);
         int idxDir =0;
         while(*(allDir+idxDir)!=0)
@@ -49,11 +83,11 @@ void cmdLs()
         	debug("%s\n",*(allDir+idxDir));
         	idxDir++;
 
-        }*/
+        }
+        */
         char* args[2];
-        args[0] = "/bin/ls";
+        args[0] = "/bin/ls"; //executable needs keyvalue, filename with args, and filename path
         args[1] = NULL;
-     //   char* lsThing = "ls";
         char* envp[2];
         envp[0] = "PATH=/bin";
         envp[1] = NULL;
@@ -62,14 +96,8 @@ void cmdLs()
         int status;
 	if(pid ==0)
 	{
-
-        	execve("/bin/ls",args,envp);//path, arg
-        	perror("failed");
-//            printf("%s\n",*(allDir+idxDir));
-//            char* fileDir = *(allDir+idxDir);
-//            printf("%s\n",getenv(fileDir));
-
-
+       	execve("/bin/ls",args,envp);//path, arg
+       	perror("failed");
 		exit(EXIT_SUCCESS);
 	}
 	wait(&status);
