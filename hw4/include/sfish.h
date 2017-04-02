@@ -19,5 +19,7 @@ void cmdLs();
 void cmdPwd();
 char** strSplit(char* line,char* delimiter);
 void cmdExecutable(char** words);
-void relativeExecutable(char** words);
+void cmdNotRelative(char** words);
+void handlerAlarm();
+void cmdAlarm(int num);
 #endif

@@ -29,6 +29,7 @@ int main(int argc, char const *argv[], char* envp[]){
         /* All your debug print statements should use the macros found in debu.h */
         /* Use the `make debug` target in the makefile to run with these enabled. */
       //  info("Length of command entered: %ld\n", strlen(cmd));
+
         char* delimiter =" ";
         char** words = strSplit(cmd,delimiter);
         int x= isValidCmd(words);
@@ -44,7 +45,32 @@ int main(int argc, char const *argv[], char* envp[]){
                 cmdLs();
             else if(x==5)
                 cmdExecutable(words);
-            //asdasd
+             else if(x==6)
+                cmdNotRelative(words);
+            else if(x==7)
+                {
+                    int idx= 0;
+                    int num =0;
+                    while(*(*(words+1)+idx)!=0)
+                    {
+
+                        if( (int)(*(*(words+1)+idx)) >48 || (int)(*(*(words+1)+idx)<57) )
+                        {
+                            num*=0;
+                            num+=  (int)(*(*(words+1)+idx)) - 48;
+                            idx++;
+                        }
+                        else
+                        {
+                            printf("Invalid buffer");
+                            exit(EXIT_FAILURE);
+                        }
+
+                    }
+
+                    cmdAlarm(num);
+                }
+
         }
         else if(x==-1)
             printf("Invalid command, use help.\n");

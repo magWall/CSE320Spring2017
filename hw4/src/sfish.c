@@ -5,9 +5,14 @@
 #include <sys/wait.h>
 #include <debug.h>
 #include <dirent.h>
+#include <fcntl.h>           /* Definition of AT_* constants */
+#include <sys/stat.h>
+#include <signal.h>
+#include <time.h>
 
 int isValidCmd(char** words){
 char* cmd = *words;
+
 if(strcmp(cmd,"cd")==0)
 	return 1;
 else if(strcmp(cmd,"help")==0) //only 1 argument
@@ -18,12 +23,56 @@ else if(strcmp(cmd,"help")==0) //only 1 argument
 }
 else if(strcmp(cmd,"pwd") ==0)
 	return 3;
-else if(strcmp(cmd,"ls")==0)
+else if(strcmp(cmd,"ls")==0) //test for ls
 	return 4;
-else if(strstr(cmd,"/")!=0) //relative
+else if(strstr(cmd,"/")!=0) //relative bin/whatever
 	return 5;
-return -1;
+else if(strncmp(cmd,"alarm",5)==0)
+	return 7;
+else //assumes exists inside call
+	return 6;
 }
+int alarmLenTime=0;
+unsigned int pidChilDied =0;
+unsigned int timeTaken =0;
+void handlerAlarm()
+{
+
+	printf("Your %i second timer has finished!\n",alarmLenTime); //i = unsigned int
+}
+
+void handlerChld()
+{
+
+	printf("Child with PID %i has died. It spent %i milliseconds utilizing the CPU.\n",pidChilDied,timeTaken);
+
+}
+void cmdAlarm(int num)
+{
+
+	int status;
+	alarmLenTime = num;
+	pid_t pid = Fork();
+
+	if(pid ==0)
+	{
+		double timerStart = clock();
+		while(1)	//paused whenever alarm happens, waits until recalls signal
+		{
+			signal(SIGALRM,handlerAlarm); //signum, signal_handler
+			alarm(num);
+			pause();
+		}
+		double timerEnd = clock();
+		timeTaken = (timerEnd - timerStart)*1000;
+
+	}
+	pid = wait(&status);
+	handlerChld();
+
+
+}
+
 void unix_error(char* msg)
 {
 	fprintf(stderr, "%s:%s\n", msg, strerror(errno));
@@ -38,39 +87,93 @@ pid_t Fork(void)
 	}
 	return pid;
 }
-void cmdExecutable(char** words) //runs through relative path ---- BROKEN
+void cmdNotRelative(char** words) //for cat, ls, and such
+{
+		int argsLen = 0;
+		while( *(words+argsLen)!=0)
+			argsLen++;
+		char* args[argsLen+1];//+1 for null
+		char somechar[256] = "/bin/";
+		strcat(somechar, *words);
+        args[0] = somechar; //executable needs keyvalue, filename with args, and filename path
+     //   debug("%s\n",args[0]);
+        int idx =1;
+        while( *(words+idx)!=0) //for args -i -r -etc
+		{
+			args[idx]=*(words+idx);
+			idx++;
+		}
+		args[argsLen+1]=NULL;
+        char* paths = getenv("PATH");
+    	char* delimiter2 = ":";
+    	char** allDir = strSplit(paths, delimiter2);
+
+        pid_t pid = Fork();
+        int status;
+	if(pid ==0)
+	{
+		double timerStart = clock();
+		 struct stat tmpStat; //check exists
+		 stat(args[0],&tmpStat);
+    	if(tmpStat.st_mode ==0) //if st_mode is 0, it is unexecutable
+    	{
+    		perror("Cannot execute");
+    		exit(EXIT_FAILURE);
+    	}
+       	execve(args[0],args,allDir);//path, arg
+       	perror("failed");
+       	double timerEnd = clock();
+       	timeTaken = (timerEnd - timerStart)*1000;
+		exit(EXIT_SUCCESS);
+	}
+	pid = wait(&status);
+	handlerChld();
+
+}
+void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 {
 	int argsLen = 0;
 	while( *(words+argsLen)!=0)
 		argsLen++;
 	char* args[argsLen+1];//+1 for null
-	args[0]= "/";
-	strcat(args[0],*words);
+	//args[0]= "/";
+	args[0]= *words;
+
+	debug("%s\n",args[0]);
 	int idx = 1;
 
 	while( *(words+idx)!=0) //for args -i -r -etc
 	{
 		args[idx]=*(words+idx);
+		idx++;
 	}
 	args[argsLen+1]=NULL;
+//	char* envp[2];
+//	envp[0] = "PATH=";
 
-	char* envp[2];
-	envp[0] = "PATH=";
-	strcat(envp[0],getenv("PWD")); //set relative path
-	strcat(envp[0],args[0]);
-	envp[1] = NULL;
+	char* paths = getenv("PATH");
+    char* delimiter2 = ":";
+    char** allDir = strSplit(paths, delimiter2);
+
+//	envp[1] = NULL;
 	pid_t pid = Fork();
     int status;
 	if(pid ==0)
 	{
-       	execve(args[0],args,envp);//path, arg
+	//	 struct stat tmpStat;
+	//	 stat(args[0],&tmpStat);
+		double timerStart = clock();
+       	execve(args[0],args,allDir);//path, arg
        	perror("failed");
+       	double timerEnd = clock();
+       	timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);
+	pid = wait(&status);
+	handlerChld();
 
 }
-void cmdLs()
+void cmdLs() //test for ls to see if it works
 {
 	  /*  char* delimiter2 = ":";
         char* paths = getenv("PATH");
@@ -89,15 +192,18 @@ void cmdLs()
         args[0] = "/bin/ls"; //executable needs keyvalue, filename with args, and filename path
         args[1] = NULL;
         char* envp[2];
-        envp[0] = "PATH=/bin";
+        envp[0] = "/bin";
         envp[1] = NULL;
 
         pid_t pid = Fork();
         int status;
 	if(pid ==0)
 	{
+		double timerStart = clock();
        	execve("/bin/ls",args,envp);//path, arg
        	perror("failed");
+       	double timerEnd = clock();
+        timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
 	wait(&status);
@@ -308,6 +414,7 @@ void cmdPwd()
 	pid_t pid;
 	if( (pid=fork())==0 )
 	{
+		int timerStart = clock();
 		if( (outputBuffer=malloc(size*sizeof(char*)) )!=NULL)
 		{
 			outputPtr =getcwd(outputBuffer,size); //get working directory, put into outputPtr
@@ -333,10 +440,12 @@ void cmdPwd()
 			perror("Malloc for PWD failed.");
 			exit(EXIT_FAILURE);
 		}
+		int timerEnd = clock();
+		timeTaken = timerEnd - timerStart;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);//when terminates, status becomes 256
-	outputPtr = "";
+	pid = wait(&status);//when terminates, status becomes 256
+	handlerChld();
 
 }
 
