@@ -8,6 +8,7 @@
 #include <fcntl.h>           /* Definition of AT_* constants */
 #include <sys/stat.h>
 #include <signal.h>
+#include <time.h>
 
 int isValidCmd(char** words){
 char* cmd = *words;
@@ -32,6 +33,20 @@ else //assumes exists inside call
 	return 6;
 }
 int alarmLenTime=0;
+unsigned int pidChilDied =0;
+unsigned int timeTaken =0;
+void handlerAlarm()
+{
+
+	printf("Your %i second timer has finished!\n",alarmLenTime); //i = unsigned int
+}
+
+void handlerChld()
+{
+
+	printf("Child with PID %i has died. It spent %i milliseconds utilizing the CPU.\n",pidChilDied,timeTaken);
+
+}
 void cmdAlarm(int num)
 {
 
@@ -41,26 +56,23 @@ void cmdAlarm(int num)
 
 	if(pid ==0)
 	{
+		double timerStart = clock();
 		while(1)	//paused whenever alarm happens, waits until recalls signal
 		{
 			signal(SIGALRM,handlerAlarm); //signum, signal_handler
 			alarm(num);
 			pause();
 		}
+		double timerEnd = clock();
+		timeTaken = (timerEnd - timerStart)*1000;
 
 	}
-	wait(&status);
+	pid = wait(&status);
+	handlerChld();
 
 
 }
-void handlerAlarm()
-{
 
-	printf("Your %i second timer has finished!\n",alarmLenTime); //i = unsigned int
-//	printf("Child with PID %i has died. It spent %i milliseconds utilizing the CPU.",pid,time);
-
-
-}
 void unix_error(char* msg)
 {
 	fprintf(stderr, "%s:%s\n", msg, strerror(errno));
@@ -100,7 +112,7 @@ void cmdNotRelative(char** words) //for cat, ls, and such
         int status;
 	if(pid ==0)
 	{
-
+		double timerStart = clock();
 		 struct stat tmpStat; //check exists
 		 stat(args[0],&tmpStat);
     	if(tmpStat.st_mode ==0) //if st_mode is 0, it is unexecutable
@@ -110,9 +122,12 @@ void cmdNotRelative(char** words) //for cat, ls, and such
     	}
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
+       	double timerEnd = clock();
+       	timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);
+	pid = wait(&status);
+	handlerChld();
 
 }
 void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
@@ -140,8 +155,6 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
     char* delimiter2 = ":";
     char** allDir = strSplit(paths, delimiter2);
 
-
-
 //	envp[1] = NULL;
 	pid_t pid = Fork();
     int status;
@@ -149,12 +162,15 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 	{
 	//	 struct stat tmpStat;
 	//	 stat(args[0],&tmpStat);
-
+		double timerStart = clock();
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
+       	double timerEnd = clock();
+       	timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);
+	pid = wait(&status);
+	handlerChld();
 
 }
 void cmdLs() //test for ls to see if it works
@@ -183,8 +199,11 @@ void cmdLs() //test for ls to see if it works
         int status;
 	if(pid ==0)
 	{
+		double timerStart = clock();
        	execve("/bin/ls",args,envp);//path, arg
        	perror("failed");
+       	double timerEnd = clock();
+        timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
 	wait(&status);
@@ -395,6 +414,7 @@ void cmdPwd()
 	pid_t pid;
 	if( (pid=fork())==0 )
 	{
+		int timerStart = clock();
 		if( (outputBuffer=malloc(size*sizeof(char*)) )!=NULL)
 		{
 			outputPtr =getcwd(outputBuffer,size); //get working directory, put into outputPtr
@@ -420,10 +440,12 @@ void cmdPwd()
 			perror("Malloc for PWD failed.");
 			exit(EXIT_FAILURE);
 		}
+		int timerEnd = clock();
+		timeTaken = timerEnd - timerStart;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);//when terminates, status becomes 256
-	outputPtr = "";
+	pid = wait(&status);//when terminates, status becomes 256
+	handlerChld();
 
 }
 

@@ -29,6 +29,7 @@ int main(int argc, char const *argv[], char* envp[]){
         /* All your debug print statements should use the macros found in debu.h */
         /* Use the `make debug` target in the makefile to run with these enabled. */
       //  info("Length of command entered: %ld\n", strlen(cmd));
+
         char* delimiter =" ";
         char** words = strSplit(cmd,delimiter);
         int x= isValidCmd(words);
