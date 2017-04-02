@@ -206,7 +206,8 @@ void cmdLs() //test for ls to see if it works
         timeTaken = (timerEnd - timerStart)*1000;
 		exit(EXIT_SUCCESS);
 	}
-	wait(&status);
+	pid = wait(&status);
+	handlerChld();
 
 
 }
