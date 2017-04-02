@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <fcntl.h>           /* Definition of AT_* constants */
 #include <sys/stat.h>
+#include <signal.h>
 
 int isValidCmd(char** words){
 char* cmd = *words;
@@ -25,11 +26,39 @@ else if(strcmp(cmd,"ls")==0) //test for ls
 	return 4;
 else if(strstr(cmd,"/")!=0) //relative bin/whatever
 	return 5;
+else if(strncmp(cmd,"alarm",5)==0)
+	return 7;
 else //assumes exists inside call
 	return 6;
 }
-void cmdAlarm()
+int alarmLenTime=0;
+void cmdAlarm(int num)
 {
+
+	int status;
+	alarmLenTime = num;
+	pid_t pid = Fork();
+
+	if(pid ==0)
+	{
+		while(1)	//paused whenever alarm happens, waits until recalls signal
+		{
+			signal(SIGALRM,handlerAlarm); //signum, signal_handler
+			alarm(num);
+			pause();
+		}
+
+	}
+	wait(&status);
+
+
+}
+void handlerAlarm()
+{
+
+	printf("Your %i second timer has finished!\n",alarmLenTime); //i = unsigned int
+//	printf("Child with PID %i has died. It spent %i milliseconds utilizing the CPU.",pid,time);
+
 
 }
 void unix_error(char* msg)

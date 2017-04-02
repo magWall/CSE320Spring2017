@@ -46,7 +46,30 @@ int main(int argc, char const *argv[], char* envp[]){
                 cmdExecutable(words);
              else if(x==6)
                 cmdNotRelative(words);
-            //asdasd
+            else if(x==7)
+                {
+                    int idx= 0;
+                    int num =0;
+                    while(*(*(words+1)+idx)!=0)
+                    {
+
+                        if( (int)(*(*(words+1)+idx)) >48 || (int)(*(*(words+1)+idx)<57) )
+                        {
+                            num*=0;
+                            num+=  (int)(*(*(words+1)+idx)) - 48;
+                            idx++;
+                        }
+                        else
+                        {
+                            printf("Invalid buffer");
+                            exit(EXIT_FAILURE);
+                        }
+
+                    }
+
+                    cmdAlarm(num);
+                }
+
         }
         else if(x==-1)
             printf("Invalid command, use help.\n");
