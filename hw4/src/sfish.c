@@ -28,6 +28,10 @@ else if(strstr(cmd,"/")!=0) //relative bin/whatever
 else //assumes exists inside call
 	return 6;
 }
+void cmdAlarm()
+{
+
+}
 void unix_error(char* msg)
 {
 	fprintf(stderr, "%s:%s\n", msg, strerror(errno));
@@ -42,7 +46,7 @@ pid_t Fork(void)
 	}
 	return pid;
 }
-void cmdNotRelative(char** words)
+void cmdNotRelative(char** words) //for cat, ls, and such
 {
 		int argsLen = 0;
 		while( *(words+argsLen)!=0)
@@ -51,7 +55,7 @@ void cmdNotRelative(char** words)
 		char somechar[256] = "/bin/";
 		strcat(somechar, *words);
         args[0] = somechar; //executable needs keyvalue, filename with args, and filename path
-        debug("%s\n",args[0]);
+     //   debug("%s\n",args[0]);
         int idx =1;
         while( *(words+idx)!=0) //for args -i -r -etc
 		{
@@ -69,9 +73,10 @@ void cmdNotRelative(char** words)
 	{
 
 		 struct stat tmpStat; //check exists
-    	if(stat(args[0],&tmpStat) ==0)
+		 stat(args[0],&tmpStat);
+    	if(tmpStat.st_mode ==0) //if st_mode is 0, it is unexecutable
     	{
-    		perror("File Does Not Exist");
+    		perror("Cannot execute");
     		exit(EXIT_FAILURE);
     	}
        	execve(args[0],args,allDir);//path, arg
@@ -105,7 +110,7 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
 	char* paths = getenv("PATH");
     char* delimiter2 = ":";
     char** allDir = strSplit(paths, delimiter2);
-   ;
+
 
 
 //	envp[1] = NULL;
@@ -113,12 +118,9 @@ void cmdExecutable(char** words) //runs through relative path ---- FIXED[?]
     int status;
 	if(pid ==0)
 	{
-		 struct stat tmpStat;
-    	if(stat(args[0],&tmpStat) ==0)
-    	{
-    		perror("File Does Not Exist");
-    		exit(EXIT_FAILURE);
-    	}
+	//	 struct stat tmpStat;
+	//	 stat(args[0],&tmpStat);
+
        	execve(args[0],args,allDir);//path, arg
        	perror("failed");
 		exit(EXIT_SUCCESS);
