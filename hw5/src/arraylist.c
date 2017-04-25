@@ -1,4 +1,4 @@
-#include "arraylist.h"
+#include <arraylist.h>
 #include <errno.h>
 
 /**
@@ -7,13 +7,38 @@
  */
 static bool resize_al(arraylist_t* self){
     bool ret = false;
+    //increase arraylist
+    if(self->capacity == self->length)
+    {
+        //P & V & resize if alloc space allowed
+    }
+    //decrease arraylist
+    else if( (self->capacity/2)-1 == self->length)
+    {
+        if( (self->capacity /2)-1 <INIT_SZ)//if less than original size, do not shrink
+        {
+            return false;
+        }
+        //if not less, lock, write new stuff, shrink, unlock
+        //P
+        self->capacity = (self->capacity/2);
+        //V
+        ret = true;
+    }
 
     return ret;
 }
 
 arraylist_t *new_al(size_t item_size){
     void *ret = NULL;
+    ret = calloc(item_size, INIT_SZ); //space for arraylist
+    if( ret == NULL)
+    {
+        errno = ENOMEM; //when null returned, no space
+        return ret;
 
+    }
+    ((arraylist_t*)ret)->item_size = item_size;
     return ret;
 }
 

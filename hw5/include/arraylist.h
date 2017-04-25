@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "const.h"
+#include <const.h>
 
 /*
     _  _____ _____ _   _     ____  _     _____    ____  _____    _    ____
