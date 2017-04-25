@@ -50,24 +50,26 @@ size_t insert_al(arraylist_t *self, void* data){
     return ret;
 }
 
-void *get_data_al(arraylist_t *self, void *data){
-    void *ret = NULL;
+size_t get_data_al(arraylist_t *self, void *data){
+    size_t ret = 0;
 
     return ret;
 }
+
 void *get_index_al(arraylist_t *self, size_t index){
     void *ret = NULL;
 
     return ret;
 }
 
-void *remove_data_al(arraylist_t *self, void *data){
-    void *ret = 0;
+bool remove_data_al(arraylist_t *self, void *data){
+    bool ret = false;
 
     resize_al(self);
 
     return ret;
 }
+
 void *remove_index_al(arraylist_t *self, size_t index){
     void *ret = 0;
 

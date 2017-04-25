@@ -1,10 +1,10 @@
 #ifndef ARRAYLIST_H
 #define ARRAYLIST_H
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <const.h>
+#include <stdbool.h>
+#include "<const.h>"
 
 /*
     _  _____ _____ _   _     ____  _     _____    ____  _____    _    ____
@@ -28,10 +28,10 @@ arraylist_t *new_al(size_t item_size);
 
 size_t insert_al(arraylist_t *self, void* data);
 
-void *get_data_al(arraylist_t *self, void *data);
+size_t get_data_al(arraylist_t *self, void* data);
 void *get_index_al(arraylist_t *self, size_t index);
 
-void *remove_data_al(arraylist_t *self, void *data);
+bool remove_data_al(arraylist_t *self, void *data);
 void *remove_index_al(arraylist_t *self, size_t index);
 
 void delete_al(arraylist_t *self, void (*free_item_func)(void*));
