@@ -106,7 +106,7 @@ size_t insert_al(arraylist_t *self, void* data){
     if(self->length < self->capacity)
     {
         P(&mutex);//modifying values P and V
-        memcpy(((void*)(self->base+ (self->length *self->item_size))),data,
+        memcpy((char*)self->base+ (self->length *self->item_size),data,
             self->item_size);
         self->length+=1;
         V(&mutex);
@@ -132,7 +132,7 @@ size_t get_data_al(arraylist_t *self, void *data){
     for(int i=0;i<num;i++)
     {
         P(&mutex);
-        if(memcmp(self->base+(i*self->item_size),data,self->item_size)==0)
+        if(memcmp((char*)self->base+(i*self->item_size),data,self->item_size)==0)
             ret = i;
         V(&mutex);
     }
@@ -146,8 +146,21 @@ size_t get_data_al(arraylist_t *self, void *data){
 }
 
 void *get_index_al(arraylist_t *self, size_t index){
-    void *ret = NULL;
-
+    void *ret= malloc(self->item_size);
+    if(ret==NULL)
+    {
+        errno=ENOMEM;
+        unix_error("No memory left to return idx");
+        return NULL;
+    }
+    if(self->length < index)//idx+1 == length if they  are equal
+    {
+        //length == current num elements, but idx starts at 0
+        memcpy(ret, (char*)self->base+((self->length-1)*self->item_size),self->item_size);
+        return ret;
+    }
+    //self->length > idx
+    memcpy(ret, (char*)self->base+(index*self->item_size),self->item_size);
     return ret;
 }
 
