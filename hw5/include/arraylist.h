@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdbool.h>
-#include "<const.h>"
+#include <const.h>
+#include <errno.h>
+#include <semaphore.h>
+#include <stdio.h>
 
 /*
     _  _____ _____ _   _     ____  _     _____    ____  _____    _    ____
@@ -23,6 +26,11 @@ typedef struct{
     /* END: .. add locks, other fields BELOW THIS COMMENT if needed .. */
 
 }arraylist_t;
+
+
+void V(sem_t* s);
+void P(sem_t* s);
+void unix_error(char* msg);
 
 arraylist_t *new_al(size_t item_size);
 

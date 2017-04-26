@@ -1,11 +1,32 @@
-#include <arraylist.h>
-#include <errno.h>
+#include "arraylist.h"
 
+//#include "csapp.h" //wraps sem_wait and sem_pos to P and V
 /**
  * @visibility HIDDEN FROM USER
  * @return     true on success, false on failure
  */
+extern int errno; //from  errno.h
+void unix_error(char* msg)
+{
+    //pass in error msg, fprintf threadsafe I think
+    fprintf(stderr,"%s: %d\n",msg,errno);
+}
+void P(sem_t* s)
+{
+    //wait until value
+    if(sem_wait(s)<0) // zero upon call since decrement
+        unix_error("Cannot P properly");
+
+}
+void V(sem_t* s)
+{
+    //after done
+    if(sem_post(s)<0)
+        unix_error("Cannot V properly");
+}
 static bool resize_al(arraylist_t* self){
+    sem_t mutex;
+    sem_init(&mutex, 0,1); //set mutex to 1
     bool ret = false;
     //increase arraylist
     if(self->capacity == self->length)
@@ -21,7 +42,9 @@ static bool resize_al(arraylist_t* self){
         }
         //if not less, lock, write new stuff, shrink, unlock
         //P
+        P(&mutex);
         self->capacity = (self->capacity/2);
+        V(&mutex);
         //V
         ret = true;
     }
@@ -36,9 +59,12 @@ arraylist_t *new_al(size_t item_size){
     {
         errno = ENOMEM; //when null returned, no space
         return ret;
-
     }
+    //P
+
     ((arraylist_t*)ret)->item_size = item_size;
+
+    //V
     return ret;
 }
 

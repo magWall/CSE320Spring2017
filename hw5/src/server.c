@@ -4,4 +4,7 @@
 
 int main(int argc, char *argv[]){
 
+	unix_error("help");
+
+
 }
