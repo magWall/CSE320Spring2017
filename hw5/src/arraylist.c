@@ -39,6 +39,7 @@ static bool resize_al(arraylist_t* self){
          ) == NULL)
         {
             errno = ENOMEM;
+            unix_error("Out of memory");
             ret = false;
             return ret;
         }
@@ -60,10 +61,10 @@ static bool resize_al(arraylist_t* self){
 
         V(&mutex);
         //V
-        if((self->base = realloc(self->base, self->capacity*self->item_size)
-         ) == NULL)
+        if(self->base == NULL)
         {
             errno = ENOMEM;
+            unix_error("Realloc failed, out of memory");
             ret = false;
             return ret;
         }
@@ -81,6 +82,7 @@ arraylist_t *new_al(size_t item_size){
     if( ret == NULL)
     {
         errno = ENOMEM; //when null returned, no space
+        unix_error("out of memory");
         return ret;
     }
     //P
@@ -108,16 +110,37 @@ size_t insert_al(arraylist_t *self, void* data){
             self->item_size);
         self->length+=1;
         V(&mutex);
+        bool tmpBool = false;
         if(self->capacity == self->length)
-            resize_al(self);
-        return self->length;
+            tmpBool = resize_al(self); //false when out of mem
+        if(tmpBool == true)
+            return self->length;
     }
-
+    //capacity same as lengths, some error
+    errno= ENOMEM;
     return ret;
 }
 
 size_t get_data_al(arraylist_t *self, void *data){
     size_t ret = 0;
+    if(data == NULL)
+        return ret;
+    sem_t mutex;
+    ret = -1; //set -1 to be out of idx
+    sem_init(&mutex,0,1);
+    int num = self->length;
+    for(int i=0;i<num;i++)
+    {
+        P(&mutex);
+        if(memcmp(self->base+(i*self->item_size),data,self->item_size)==0)
+            ret = i;
+        V(&mutex);
+    }
+    if(ret == -1)//not in list
+    {
+        errno= ENODATA;//
+        unix_error("Not in list");
+    }
 
     return ret;
 }
