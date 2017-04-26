@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <semaphore.h>
 #include <stdio.h>
-
+#include <string.h>
 /*
     _  _____ _____ _   _     ____  _     _____    ____  _____    _    ____
    / \|_   _|_   _| \ | |   |  _ \| |   |__  /   |  _ \| ____|  / \  |  _ \
@@ -28,9 +28,9 @@ typedef struct{
 }arraylist_t;
 
 
-void V(sem_t* s);
-void P(sem_t* s);
-void unix_error(char* msg);
+void V(sem_t* s);//wrappers
+void P(sem_t* s);//wrappers
+void unix_error(char* msg);//errno
 
 arraylist_t *new_al(size_t item_size);
 
