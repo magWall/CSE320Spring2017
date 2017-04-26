@@ -35,6 +35,15 @@ static bool resize_al(arraylist_t* self){
         //P & V & resize if alloc space allowed
         self->capacity = (self->capacity*2);
         V(&mutex);
+        if((self->base = realloc(self->base, self->capacity*self->item_size)
+         ) == NULL)
+        {
+            errno = ENOMEM;
+            ret = false;
+            return ret;
+        }
+            ret = true;
+
     }
     //decrease arraylist
     else if( (self->capacity/2)-1 == self->length)
@@ -47,8 +56,17 @@ static bool resize_al(arraylist_t* self){
         //P
         P(&mutex);
         self->capacity = (self->capacity/2);
+        self->base = realloc(self->base, self->capacity*self->item_size);
+
         V(&mutex);
         //V
+        if((self->base = realloc(self->base, self->capacity*self->item_size)
+         ) == NULL)
+        {
+            errno = ENOMEM;
+            ret = false;
+            return ret;
+        }
         ret = true;
     }
 
@@ -82,13 +100,18 @@ size_t insert_al(arraylist_t *self, void* data){
     size_t ret = UINT_MAX;
     sem_t mutex;
     sem_init(&mutex,0,1);
-    P(&mutex);//modifying values P and V
-    memcpy(((void*)(self->base+ (self->length *self->item_size))),data,
-        self->item_size);
-    self->length+=1;
-    V(&mutex);
-    if(self->capacity == self->length)
-        resize_al(self);
+
+    if(self->length < self->capacity)
+    {
+        P(&mutex);//modifying values P and V
+        memcpy(((void*)(self->base+ (self->length *self->item_size))),data,
+            self->item_size);
+        self->length+=1;
+        V(&mutex);
+        if(self->capacity == self->length)
+            resize_al(self);
+        return self->length;
+    }
 
     return ret;
 }
