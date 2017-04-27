@@ -28,14 +28,14 @@ static bool resize_al(arraylist_t* self){
     sem_t mutex;
     sem_init(&mutex, 0,1); //set mutex to 1
     bool ret = false;
+    void* tmpPtr;
     //increase arraylist
     if(self->capacity == self->length)
     {
         P(&mutex);
         //P & V & resize if alloc space allowed
         self->capacity = (self->capacity*2);
-        V(&mutex);
-        if((self->base = realloc(self->base, self->capacity*self->item_size)
+        if((tmpPtr = realloc(self->base, self->capacity*self->item_size)
          ) == NULL)
         {
             errno = ENOMEM;
@@ -43,6 +43,8 @@ static bool resize_al(arraylist_t* self){
             ret = false;
             return ret;
         }
+        self->base = tmpPtr;
+        V(&mutex);
             ret = true;
 
     }
@@ -57,17 +59,20 @@ static bool resize_al(arraylist_t* self){
         //P
         P(&mutex);
         self->capacity = (self->capacity/2);
-        self->base = realloc(self->base, self->capacity*self->item_size);
+        tmpPtr = realloc(self->base, self->capacity*self->item_size);
 
-        V(&mutex);
         //V
-        if(self->base == NULL)
+        if(tmpPtr == NULL)
         {
             errno = ENOMEM;
             unix_error("Realloc failed, out of memory");
             ret = false;
+            V(&mutex);//end mutex if it goes into error
             return ret;
         }
+        self->base = tmpPtr; //this must be locked
+        V(&mutex);
+
         ret = true;
     }
 
@@ -89,17 +94,31 @@ arraylist_t *new_al(size_t item_size){
     P(&mutex);
     ((arraylist_t*)ret)->item_size = item_size;
     ((arraylist_t*)ret)->capacity = INIT_SZ;
-    ((arraylist_t*)ret)->base = calloc(INIT_SZ,item_size);
+    void* tmpPtr= calloc(INIT_SZ,item_size);
+    if(tmpPtr == NULL)
+    {
+        errno = ENOMEM;
+        unix_error("out of memory");
+        V(&mutex); //gotta close mutex here
+        return ret;
+    }
+    ((arraylist_t*)ret)->base = tmpPtr;
+    //printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
+
   //  printf("%zu \n",((arraylist_t*)ret)->capacity);
  //   printf("%zu \n",((arraylist_t*)ret)->capacity);
-
     V(&mutex);
     //V
-    return ret;
+    return ((arraylist_t*)ret);
 }
 
 size_t insert_al(arraylist_t *self, void* data){
     size_t ret = UINT_MAX;
+    bool tmpBool = false;
+
+    if(self->capacity == self->length)
+        tmpBool = resize_al(self); //false when out of mem
+
     sem_t mutex;
     sem_init(&mutex,0,1);
 
@@ -109,15 +128,17 @@ size_t insert_al(arraylist_t *self, void* data){
         memcpy((char*)self->base+ (self->length *self->item_size),data,
             self->item_size);
         self->length+=1;
+        tmpBool = true;
         V(&mutex);
-        bool tmpBool = false;
-        if(self->capacity == self->length)
-            tmpBool = resize_al(self); //false when out of mem
-        if(tmpBool == true)
-            return self->length;
+        return self->length;
     }
     //capacity same as lengths, some error
-    errno= ENOMEM;
+   // reach here if(tmpBool==false)
+    if(tmpBool==false)
+    {
+        errno= ENOMEM;
+        unix_error("out of memory to insert?");
+    }
     return ret;
 }
 
