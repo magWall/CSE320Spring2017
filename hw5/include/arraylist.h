@@ -24,7 +24,7 @@ typedef struct{
     size_t item_size;
     void* base;
     /* END: .. add locks, other fields BELOW THIS COMMENT if needed .. */
-
+    sem_t mutex;
 }arraylist_t;
 
 

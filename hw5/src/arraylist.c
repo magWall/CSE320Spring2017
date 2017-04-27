@@ -25,14 +25,12 @@ void V(sem_t* s)
         unix_error("Cannot V properly");
 }
 static bool resize_al(arraylist_t* self){
-    sem_t mutex;
-    sem_init(&mutex, 0,1); //set mutex to 1
     bool ret = false;
     void* tmpPtr;
     //increase arraylist
     if(self->capacity == self->length)
     {
-        P(&mutex);
+
         //P & V & resize if alloc space allowed
         self->capacity = (self->capacity*2);
         if((tmpPtr = realloc(self->base, self->capacity*self->item_size)
@@ -44,7 +42,6 @@ static bool resize_al(arraylist_t* self){
             return ret;
         }
         self->base = tmpPtr;
-        V(&mutex);
             ret = true;
 
     }
@@ -57,7 +54,6 @@ static bool resize_al(arraylist_t* self){
         }
         //if not less, lock, write new stuff, shrink, unlock
         //P
-        P(&mutex);
         self->capacity = (self->capacity/2);
         tmpPtr = realloc(self->base, self->capacity*self->item_size);
 
@@ -67,11 +63,9 @@ static bool resize_al(arraylist_t* self){
             errno = ENOMEM;
             unix_error("Realloc failed, out of memory");
             ret = false;
-            V(&mutex);//end mutex if it goes into error
             return ret;
         }
         self->base = tmpPtr; //this must be locked
-        V(&mutex);
 
         ret = true;
     }
@@ -81,8 +75,6 @@ static bool resize_al(arraylist_t* self){
 
 arraylist_t *new_al(size_t item_size){
     void *ret = NULL;
-    sem_t mutex;
-    sem_init(&mutex,0,1);
     ret = malloc(sizeof(arraylist_t*)); //space for arraylist
     if( ret == NULL)
     {
@@ -91,7 +83,9 @@ arraylist_t *new_al(size_t item_size){
         return ret;
     }
     //P
-    P(&mutex);
+    sem_init(&((arraylist_t*)ret)->mutex,0,1);
+
+    P(&((arraylist_t*)ret)->mutex);
     ((arraylist_t*)ret)->item_size = item_size;
     ((arraylist_t*)ret)->capacity = INIT_SZ;
     void* tmpPtr= calloc(INIT_SZ,item_size);
@@ -99,15 +93,15 @@ arraylist_t *new_al(size_t item_size){
     {
         errno = ENOMEM;
         unix_error("out of memory");
-        V(&mutex); //gotta close mutex here
+        V(&((arraylist_t*)ret)->mutex); //gotta close mutex here
         return ret;
     }
     ((arraylist_t*)ret)->base = tmpPtr;
-    //printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
+    printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
 
   //  printf("%zu \n",((arraylist_t*)ret)->capacity);
  //   printf("%zu \n",((arraylist_t*)ret)->capacity);
-    V(&mutex);
+    V(&((arraylist_t*)ret)->mutex);
     //V
     return ((arraylist_t*)ret);
 }
@@ -116,24 +110,23 @@ size_t insert_al(arraylist_t *self, void* data){
     size_t ret = UINT_MAX;
     bool tmpBool = false;
 
+    P(&self->mutex);
     if(self->capacity == self->length)
         tmpBool = resize_al(self); //false when out of mem
 
-    sem_t mutex;
-    sem_init(&mutex,0,1);
-
     if(self->length < self->capacity)
     {
-        P(&mutex);//modifying values P and V
+    //modifying values P and V
         memcpy((char*)self->base+ (self->length *self->item_size),data,
             self->item_size);
         self->length+=1;
         tmpBool = true;
-        V(&mutex);
+        V(&self->mutex);
         return self->length;
     }
     //capacity same as lengths, some error
    // reach here if(tmpBool==false)
+    V(&self->mutex);
     if(tmpBool==false)
     {
         errno= ENOMEM;
@@ -146,17 +139,15 @@ size_t get_data_al(arraylist_t *self, void *data){
     size_t ret = 0;
     if(data == NULL)
         return ret;
-    sem_t mutex;
     ret = UINT_MAX; //set -1 to be out of idx
-    sem_init(&mutex,0,1);
+    P(&self->mutex);
     int num = self->length;
     for(int i=0;i<num;i++)
     {
-        P(&mutex);
         if(memcmp((char*)self->base+(i*self->item_size),data,self->item_size)==0)
             ret = i;
-        V(&mutex);
     }
+    V(&self->mutex);
     if(ret == UINT_MAX)//not in list
     {
         errno= ENODATA;//
@@ -174,41 +165,43 @@ void *get_index_al(arraylist_t *self, size_t index){
         unix_error("No memory left to return idx");
         return NULL;
     }
+    P(&self->mutex);
     if(self->length < index)//idx+1 == length if they  are equal
     {
         //length == current num elements, but idx starts at 0
         memcpy(ret, (char*)self->base+((self->length-1)*self->item_size),self->item_size);
+        V(&self->mutex);
         return ret;
     }
     //self->length > idx
     memcpy(ret, (char*)self->base+(index*self->item_size),self->item_size);
+    V(&self->mutex);
     return ret;
 }
 
 bool remove_data_al(arraylist_t *self, void *data){
     bool ret = false;
-    sem_t mutex;
-    sem_init(&mutex,0,1);
-    if(data == NULL)
+
+     if(data == NULL)
     {
+        P(&self->mutex);
         if(self->length==0)
         {
+            V(&self->mutex);
             return false;//cannot remove blank
         }
         else if(self->length==1)//1 element in list
         {
-            P(&mutex);
             memset(self->base,0,self->item_size);
             self->length-=1;
-            V(&mutex);
+            V(&self->mutex);
             return true;
         }
-        P(&mutex);
         memmove(self->base, (char*)self->base+self->item_size,(self->length-1)*self->item_size);
         self->length-=1;
         if(self->length==(self->capacity/2) -1)
             resize_al(self);
-        V(&mutex);
+        V(&self->mutex);
         return true;
         //moves everything besides element 0 , takes dest, item_size+dest, shift by all items-1*item_size
         //whe NULL, remove first element
@@ -219,22 +212,23 @@ bool remove_data_al(arraylist_t *self, void *data){
     {
         return false;
     }
+    P(&self->mutex);
     if(idx+1 == self->length)//last element to remove, just memset that
     {
-        P(&mutex);
         memset((char*)self->base+idx*self->item_size,0,self->item_size);
         self->length-=1;
-        V(&mutex);
+        if(self->length==(self->capacity/2) -1)
+            resize_al(self);
+        V(&self->mutex);
         return true;
     }
     //less than last element, between elements
-    P(&mutex);
     memmove((char*)self->base+idx*self->item_size,(char*)self->base+(idx+1)*self->item_size,(self->length-(idx+1))*self->item_size);
     self->length-=1;
-    V(&mutex);
     ret= true;
     if(self->length==(self->capacity/2) -1)
         resize_al(self);
+    V(&self->mutex);
     return ret;
 }
 

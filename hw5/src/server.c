@@ -11,13 +11,13 @@ void* functA(void* vargp)
 {
 	//printf("Hello World\n");
 	arraylist_t* tmp = new_al(sizeof(int));
-   // printf("MemAddrtmpA: %p\n",tmp->base);
+    printf("MemAddrtmpA: %p\n",tmp->base);
 	//int a =12;
 	//insert_al(tmp,&a);
 	//a = 13;
 	//insert_al(tmp,&a);
 	// free(tmp->base);
-	for(int i=20;i<24;i++)
+	for(int i=20;i<25;i++)
 	{
 		insert_al(tmp,&i);
 	}
