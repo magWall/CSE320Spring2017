@@ -17,16 +17,18 @@ void* functA(void* vargp)
 	//a = 13;
 	//insert_al(tmp,&a);
 	// free(tmp->base);
-	for(int i=20;i<25;i++)
+	for(int i=20;i<24;i++)
 	{
 		insert_al(tmp,&i);
 	}
 
 	int i=20;
-	printf("%zu\n",tmp->length);
+	printf("Alength:%zu\n",tmp->length);
 	printf("functA data20: %zu\n",get_data_al(tmp,&i));
 	printf("functA %d\n",*((int*)get_index_al(tmp,100)));
 	printf("functAidx0 %d\n",*((int*)get_index_al(tmp,0)));
+	remove_data_al(tmp,&i);
+	printf("lengthA %zu\n",tmp->length);
 
 	return NULL;
 }
@@ -40,10 +42,13 @@ void* functB(void* vargp)
 	}
 
 	int i=35;
-	printf("%zu\n",tmp->length);
+	printf("BLength:%zu\n",tmp->length);
 	printf("functB data %zu\n",get_data_al(tmp,&i));
 	printf("functB %d\n",*((int*)get_index_al(tmp,100)));
 	printf("functBidx0: %d\n",*((int*)get_index_al(tmp,0)));
+	i= 37;
+	remove_data_al(tmp,&i);
+	printf("lengthB %zu\n",tmp->length);
 
 
 

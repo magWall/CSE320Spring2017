@@ -147,7 +147,7 @@ size_t get_data_al(arraylist_t *self, void *data){
     if(data == NULL)
         return ret;
     sem_t mutex;
-    ret = -1; //set -1 to be out of idx
+    ret = UINT_MAX; //set -1 to be out of idx
     sem_init(&mutex,0,1);
     int num = self->length;
     for(int i=0;i<num;i++)
@@ -157,7 +157,7 @@ size_t get_data_al(arraylist_t *self, void *data){
             ret = i;
         V(&mutex);
     }
-    if(ret == -1)//not in list
+    if(ret == UINT_MAX)//not in list
     {
         errno= ENODATA;//
         unix_error("Not in list");
@@ -187,9 +187,54 @@ void *get_index_al(arraylist_t *self, size_t index){
 
 bool remove_data_al(arraylist_t *self, void *data){
     bool ret = false;
-
-    resize_al(self);
-
+    sem_t mutex;
+    sem_init(&mutex,0,1);
+    if(data == NULL)
+    {
+        if(self->length==0)
+        {
+            return false;//cannot remove blank
+        }
+        else if(self->length==1)//1 element in list
+        {
+            P(&mutex);
+            memset(self->base,0,self->item_size);
+            self->length-=1;
+            V(&mutex);
+            return true;
+        }
+        P(&mutex);
+        memmove(self->base, (char*)self->base+self->item_size,(self->length-1)*self->item_size);
+        self->length-=1;
+        if(self->length==(self->capacity/2) -1)
+            resize_al(self);
+        V(&mutex);
+        return true;
+        //moves everything besides element 0 , takes dest, item_size+dest, shift by all items-1*item_size
+        //whe NULL, remove first element
+        //memcpy everything but first element over to base
+    }
+    size_t idx = get_data_al(self,data);
+    if(idx ==UINT_MAX)
+    {
+        return false;
+    }
+    if(idx+1 == self->length)//last element to remove, just memset that
+    {
+        P(&mutex);
+        memset((char*)self->base+idx*self->item_size,0,self->item_size);
+        self->length-=1;
+        V(&mutex);
+        return true;
+    }
+    //less than last element, between elements
+    P(&mutex);
+    memmove((char*)self->base+idx*self->item_size,(char*)self->base+(idx+1)*self->item_size,(self->length-(idx+1))*self->item_size);
+    self->length-=1;
+    V(&mutex);
+    ret= true;
+    if(self->length==(self->capacity/2) -1)
+        resize_al(self);
     return ret;
 }
 
