@@ -14,8 +14,10 @@ void unix_error(char* msg)
 void P(sem_t* s)
 {
     //wait until value
+   // printf("waiting in P\n");
     if(sem_wait(s)<0) // zero upon call since decrement
         unix_error("Cannot P properly");
+   // printf("done\n");
 
 }
 void V(sem_t* s)
@@ -74,8 +76,8 @@ static bool resize_al(arraylist_t* self){
 }
 
 arraylist_t *new_al(size_t item_size){
-    void *ret = NULL;
-    ret = malloc(sizeof(arraylist_t*)); //space for arraylist
+    arraylist_t *ret = NULL;
+    ret = malloc(sizeof(arraylist_t)); //space for arraylist
     if( ret == NULL)
     {
         errno = ENOMEM; //when null returned, no space
@@ -83,9 +85,9 @@ arraylist_t *new_al(size_t item_size){
         return ret;
     }
     //P
-    sem_init(&((arraylist_t*)ret)->mutex,0,1);
+    sem_init(&ret->mutex,0,1);
 
-    P(&((arraylist_t*)ret)->mutex);
+    // P(&((arraylist_t*)ret)->mutex);
     ((arraylist_t*)ret)->item_size = item_size;
     ((arraylist_t*)ret)->capacity = INIT_SZ;
     void* tmpPtr= calloc(INIT_SZ,item_size);
@@ -93,15 +95,15 @@ arraylist_t *new_al(size_t item_size){
     {
         errno = ENOMEM;
         unix_error("out of memory");
-        V(&((arraylist_t*)ret)->mutex); //gotta close mutex here
+        // V(&((arraylist_t*)ret)->mutex); //gotta close mutex here
         return ret;
     }
     ((arraylist_t*)ret)->base = tmpPtr;
-    printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
+ //   printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
 
   //  printf("%zu \n",((arraylist_t*)ret)->capacity);
  //   printf("%zu \n",((arraylist_t*)ret)->capacity);
-    V(&((arraylist_t*)ret)->mutex); //if reach here, close
+    // V(&((arraylist_t*)ret)->mutex); //if reach here, close
     //V
     return ((arraylist_t*)ret);
 }
@@ -110,7 +112,9 @@ size_t insert_al(arraylist_t *self, void* data){
     size_t ret = UINT_MAX;
     bool tmpBool = false;
 
+ //   printf("waiting\n");
     P(&self->mutex);
+//    printf("dec mutex\n");
     if(self->capacity == self->length)
         tmpBool = resize_al(self); //false when out of mem
 
@@ -137,6 +141,7 @@ size_t insert_al(arraylist_t *self, void* data){
         errno= ENOMEM;
         unix_error("out of memory to insert?");
     }
+    //printf("exit\n");
     return ret;
 }
 
@@ -163,14 +168,17 @@ size_t get_data_al(arraylist_t *self, void *data){
 }
 
 void *get_index_al(arraylist_t *self, size_t index){
+    P(&self->mutex);
     void *ret= malloc(self->item_size);
+
     if(ret==NULL)
     {
         errno=ENOMEM;
         unix_error("No memory left to return idx");
+        V(&self->mutex);
         return NULL;
     }
-    P(&self->mutex);
+
     if(self->length < index)//idx+1 == length if they  are equal
     {
         //length == current num elements, but idx starts at 0
