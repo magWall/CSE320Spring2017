@@ -101,7 +101,7 @@ arraylist_t *new_al(size_t item_size){
 
   //  printf("%zu \n",((arraylist_t*)ret)->capacity);
  //   printf("%zu \n",((arraylist_t*)ret)->capacity);
-    V(&((arraylist_t*)ret)->mutex);
+    V(&((arraylist_t*)ret)->mutex); //if reach here, close
     //V
     return ((arraylist_t*)ret);
 }
@@ -114,19 +114,24 @@ size_t insert_al(arraylist_t *self, void* data){
     if(self->capacity == self->length)
         tmpBool = resize_al(self); //false when out of mem
 
+  //  size_t tmpVal = self->length;
+  //  size_t tmpCap = self->capacity;
+
     if(self->length < self->capacity)
     {
     //modifying values P and V
         memcpy((char*)self->base+ (self->length *self->item_size),data,
             self->item_size);
         self->length+=1;
+        ret = self->length;
         tmpBool = true;
-        V(&self->mutex);
-        return self->length;
+        V(&self->mutex); //mutex doesnt work
+        return ret;
     }
     //capacity same as lengths, some error
    // reach here if(tmpBool==false)
-    V(&self->mutex);
+    V(&self->mutex);    //mutex doesnt work
+
     if(tmpBool==false)
     {
         errno= ENOMEM;
