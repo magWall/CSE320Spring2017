@@ -25,11 +25,17 @@ void* functA(void* vargp)
 
 	int i=20;
 	printf("Alength:%zu\n",tmp->length);
+	void* functAData = get_index_al(tmp,100);
+
 	printf("functA data20: %zu\n",get_data_al(tmp,&i));
-	printf("functA %d\n",*((int*)get_index_al(tmp,100)));
+	printf("functA %d\n",*((int*)functAData));
 	printf("functAidx0 %d\n",*((int*)get_index_al(tmp,0)));
+	free(functAData);
 	remove_data_al(tmp,&i);
 	printf("lengthA %zu\n",tmp->length);
+	void* tmpVal = remove_index_al(tmp,100);
+	printf("lengthALastVal %zu\n",*(size_t*)tmpVal);
+	free(tmpVal);
 
 	return NULL;
 }
@@ -47,11 +53,18 @@ void* functB(void* vargp)
 	int i=35;
 	printf("BLength:%zu\n",tmp->length);
 	printf("functB data %zu\n",get_data_al(tmp,&i));
-	printf("functB %d\n",*((int*)get_index_al(tmp,100)));
-	printf("functBidx0: %d\n",*((int*)get_index_al(tmp,0)));
+	void* functBData = get_index_al(tmp,100);
+	void* functBidx0 = get_index_al(tmp,0);
+	printf("functB %d\n",*((int*)functBData));
+	printf("functBidx0: %d\n",*((int*)functBidx0));
+	free(functBData);
+	free(functBidx0);
 	i= 37;
 	remove_data_al(tmp,&i);
 	printf("lengthB %zu\n",tmp->length);
+	void* tmpVal = remove_index_al(tmp,100);
+	printf("lengthBLastVal %d\n",*(int*)tmpVal);
+	free(tmpVal);
 
 
 
@@ -62,7 +75,7 @@ void* functB(void* vargp)
 int main(int argc, char *argv[]){
 
 //	unix_error("help");
-//	functA(NULL);
+//	functB(NULL);
 	pthread_create(&threadArr[0],NULL,functA,NULL);//thread, attribute, routine, arguments
 	pthread_create(&threadArr[1],NULL,functB,NULL);
 	pthread_join(threadArr[0],NULL); //thread, return type

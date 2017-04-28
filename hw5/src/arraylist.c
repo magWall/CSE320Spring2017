@@ -246,10 +246,55 @@ bool remove_data_al(arraylist_t *self, void *data){
 }
 
 void *remove_index_al(arraylist_t *self, size_t index){
-    void *ret = 0;
+    P(&self->mutex);
+    // P on top, reading data into malloc
+    void *ret = malloc(self->item_size);
+    if(ret == NULL)
+        {
+            errno = ENOMEM;
+            unix_error("out of memory,cannot return value");
+            V(&self->mutex);
+            return NULL;
+        }
+    if(self->length==0)//failure condition
+        {
+            errno = EINVAL; // invalid idx =0
+            unix_error("Arraylist empty, cannot remove blank idx");
+            V(&self->mutex);
+            return NULL;
+        }
+        //check if length >0,
+    if(index>self->length)//if index greater than length, remove last element
+    {
+        //if length ==0, return null
 
-    resize_al(self);
+        memcpy(ret,(char*)self->base+(self->length-1)*self->item_size, self->item_size);
+        memset((char*)self->base+(self->length-1)*self->item_size,0,self->item_size);
+        self->length-=1;
+        if(self->length==(self->capacity/2) -1)
+            resize_al(self);
+        V(&self->mutex);
+        return ret;
+    }
+    //idx in between length
+    if(index+1 == self->length)//last element
+    {
+        memcpy(ret,(char*)self->base+(index*self->item_size), self->item_size);
+        memset((char*)self->base+(index)*self->item_size,0,self->item_size);
+        self->length-=1;
+        if(self->length==(self->capacity/2) -1)
+            resize_al(self);
+        V(&self->mutex);
+        return ret;
+    }
+    memcpy(ret,(char*)self->base+(index*self->item_size), self->item_size);
+    memmove((char*)self->base+(index)*self->item_size,(char*)self->base+(index+1)*self->item_size,(self->length-(index+1))*self->item_size);
+    self->length-=1;
 
+    if(self->length==(self->capacity/2) -1)
+        resize_al(self);
+
+    V(&self->mutex);
     return ret;
 }
 
