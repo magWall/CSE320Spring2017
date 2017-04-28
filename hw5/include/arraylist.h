@@ -27,10 +27,14 @@ typedef struct{
     sem_t mutex;
 }arraylist_t;
 
+typedef struct{
+	size_t test;
+}test_item_struct;
 
 void V(sem_t* s);//wrappers
 void P(sem_t* s);//wrappers
 void unix_error(char* msg);//errno
+void free_item_func(void* somePtrStruct);
 
 arraylist_t *new_al(size_t item_size);
 

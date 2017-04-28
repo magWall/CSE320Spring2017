@@ -298,10 +298,28 @@ void *remove_index_al(arraylist_t *self, size_t index){
     return ret;
 }
 
+void free_item_func(void* somePtrStruct)
+{
+    free(somePtrStruct);
+    return;
+}
 void delete_al(arraylist_t *self, void (*free_item_func)(void*)){
     //for items in list, free
+    P(&self->mutex);
+    //free funct
+    if(*free_item_func!=NULL)
+    {
+        for(int i=0;i<self->length;i++)
+            (*free_item_func)( (void*)((char*)self->base +(i*self->item_size)) );
+    //pass in value of data to free at that spot.
+        //free_item_func(void*);
+    }
     //free list
-
-
+    //free base pointer and set values to 0
+    free(self->base);
+    self->capacity=0;
+    self->length = 0;
+    self->base = NULL;//clear it
+    V(&self->mutex);
     return;
 }

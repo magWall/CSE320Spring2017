@@ -2,6 +2,7 @@
 #include "arraylist.h"
 #include "foreach.h"
 #include <unistd.h>
+#include <pthread.h>
 
 pthread_t threadArr[2];
 
@@ -21,6 +22,9 @@ void* functA(void* vargp)
 	for(int i=20;i<25;i++)
 	{
 		insert_al(tmp,&i);
+		printf("A: %d\n", i);
+
+		sleep(1);
 	}
 
 	int i=20;
@@ -31,6 +35,7 @@ void* functA(void* vargp)
 	printf("functA %d\n",*((int*)functAData));
 	printf("functAidx0 %d\n",*((int*)get_index_al(tmp,0)));
 	free(functAData);
+	sleep(1);
 	remove_data_al(tmp,&i);
 	printf("lengthA %zu\n",tmp->length);
 	void* tmpVal = remove_index_al(tmp,100);
@@ -47,6 +52,9 @@ void* functB(void* vargp)
 	{
 	//	printf("%d\n", i);
 		insert_al(tmp,&i);
+		sleep(1);
+		printf("B: %d\n", i);
+
 		//printf("%p\n",tmp->base);
 	}
 
@@ -56,6 +64,7 @@ void* functB(void* vargp)
 	void* functBData = get_index_al(tmp,100);
 	void* functBidx0 = get_index_al(tmp,0);
 	printf("functB %d\n",*((int*)functBData));
+	sleep(1);
 	printf("functBidx0: %d\n",*((int*)functBidx0));
 	free(functBData);
 	free(functBidx0);
@@ -65,7 +74,7 @@ void* functB(void* vargp)
 	void* tmpVal = remove_index_al(tmp,100);
 	printf("lengthBLastVal %d\n",*(int*)tmpVal);
 	free(tmpVal);
-
+	delete_al(tmp,NULL);
 
 
 //	printf("Hello World2\n");
@@ -76,6 +85,7 @@ int main(int argc, char *argv[]){
 
 //	unix_error("help");
 //	functB(NULL);
+//	pthread_setconcurrency(2);
 	pthread_create(&threadArr[0],NULL,functA,NULL);//thread, attribute, routine, arguments
 	pthread_create(&threadArr[1],NULL,functB,NULL);
 	pthread_join(threadArr[0],NULL); //thread, return type
