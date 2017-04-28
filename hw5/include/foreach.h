@@ -13,9 +13,9 @@
 
 #define foreach_break if( foreach_break_f() ) break
 
-void *foreach_init(void *self);
+void *foreach_init(arraylist_t *items);
 
-void *foreach_next(void *self, void* data);
+void *foreach_next(arraylist_t *items, void* data);
 
 size_t foreach_index();
 

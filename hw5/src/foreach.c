@@ -2,13 +2,14 @@
 #include "arraylist.h"
 #include "foreach.h"
 
-void *foreach_init(void *self){
+void *foreach_init(arraylist_t *items){
     void *ret = NULL;
+
 
     return ret;
 }
 
-void *foreach_next(void *self, void* data){
+void *foreach_next(arraylist_t *items, void* data){
     void *ret = NULL;
 
     return ret;
