@@ -4,6 +4,11 @@
 
 void *foreach_init(arraylist_t *items){
     void *ret = NULL;
+   // pthread_t someThread;
+   // pthread_create(&someThread, NULL, foreach_next, NULL);
+    //pthread_key k= pthread_key_create();
+    //pthread_setspecific(k,items->curr_idx);
+
     //my semaphores are already initalized when I create arraylist
     P(&items->mutex);
     if(items->length ==0)
@@ -17,6 +22,7 @@ void *foreach_init(arraylist_t *items){
 void *foreach_next(arraylist_t *items, void* data){
     void *ret = NULL;
     P(&items->mutex);
+    //all data here is read-write, and cheaper to call P and V once
     if(data == NULL)
     {
         items->curr_idx+=1;
@@ -44,17 +50,22 @@ void *foreach_next(arraylist_t *items, void* data){
 size_t foreach_index(){
     size_t ret = 0;
 
+    //error case returns UINT_MAX
+
     return ret;
 }
 
 bool foreach_break_f(){
-    bool ret = false;
+    bool ret = true;
+    //always true
+    /* clean up loop */
 
     return ret;
 }
+#define foreach_break if (foreach_break_()) break
 
-int32_t apply(void *self, int32_t (*application)(void*)){
-    int32_t ret = 0;
+int apply(arraylist_t *items, int (*application)(void*)){
+    int ret = 0;
 
     return ret;
 }
