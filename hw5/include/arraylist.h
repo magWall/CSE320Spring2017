@@ -25,6 +25,7 @@ typedef struct{
     void* base;
     /* END: .. add locks, other fields BELOW THIS COMMENT if needed .. */
     sem_t mutex;
+    size_t curr_idx;
 }arraylist_t;
 
 typedef struct{

@@ -99,6 +99,7 @@ arraylist_t *new_al(size_t item_size){
         return ret;
     }
     ((arraylist_t*)ret)->base = tmpPtr;
+    ((arraylist_t*)ret)->curr_idx = 0;
  //   printf("MemAddrret: %p\n",((arraylist_t*)ret)->base);
 
   //  printf("%zu \n",((arraylist_t*)ret)->capacity);
