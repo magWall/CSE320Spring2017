@@ -44,17 +44,21 @@ void *foreach_next(arraylist_t *items, void* data){
 size_t foreach_index(){
     size_t ret = 0;
 
+    //error case returns UINT_MAX
+
     return ret;
 }
 
 bool foreach_break_f(){
-    bool ret = false;
+    bool ret = true;
+    //always true
+    /* clean up loop */
 
     return ret;
 }
 
-int32_t apply(void *self, int32_t (*application)(void*)){
-    int32_t ret = 0;
+int apply(arraylist_t *items, int (*application)(void*)){
+    int ret = 0;
 
     return ret;
 }

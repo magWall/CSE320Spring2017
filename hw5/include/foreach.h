@@ -21,6 +21,6 @@ size_t foreach_index();
 
 bool foreach_break_f();
 
-int apply(void *self, int (*application)(void*));
+int apply(arraylist_t *items, int (*application)(void*));
 
 #endif
