@@ -1,0 +1,45 @@
+Tests,Points,OutOf,Notes
+24_ForEach_Multi_Thread_Insert,0,4,['24_test.c:54: Failed to insert element[0] in arraylist.']
+23_ForEach_Multi_Thread_Delete_Break,0,4,['23_test.c:48: Failed to insert element[0] in arraylist.']
+22_ForEach_Multi_Thread_Delete,0,4,['22_test.c:44: Failed to insert element[0] in arraylist.']
+21_ForEachApply_Multi_Thread,0,2,['21_test.c:51: Failed to insert element[0] in arraylist.']
+20_ForEachApply_Multi_Thread_Failure,0,2,['20_test.c:39: Failed to insert element[0] in arraylist.']
+19_ForEachApply_Single_Thread_Failure,0,2,['19_test.c:28: Failed to insert element[0] in arraylist.']
+18_ForEachApply_Multi_Thread,0,2,['18_test.c:39: Failed to insert element[0] in arraylist.']
+17_ForEachApply_Single_Thread,0,2,['17_test.c:28: Failed to insert element[0] in arraylist.']
+16_ForEachBreak_Multi_Thread,0,1,['16_test.c:47: Failed to insert element[0] in arraylist.']
+15_ForEachBreak_Single_Thread,0,1,['15_test.c:21: Failed to insert element[0] in arraylist.']
+14_ForEachIndex_Single_Thread_Uninitialized,0,1,['14_test.c:21: Failed to insert element[0] in arraylist.']
+13_ForEachIndex_Multi_Thread,0,2,['13_test.c:45: Failed to insert element[0] in arraylist.']
+12_ForEachIndex_Single_Thread,0,2,['12_test.c:21: Failed to insert element[0] in arraylist.']
+11_ForEachNext_Multi_Thread_EOL_Update,0,2,['11_test.c:43: Failed to insert element[0] in arraylist.']
+10_ForEachNext_Single_Thread_EOL_No_Update,0,2,['10_test.c:22: Failed to insert element[0] in arraylist.']
+09_ForEachNext_Multi_Thread_Next_Item_No_Update,0,2,['09_test.c:48: Failed to insert element[0] in arraylist.']
+08_ForEachNext_Single_Thread_Next_Item_No_Update,0,2,['08_test.c:22: Failed to insert element[0] in arraylist.']
+07_ForEachNext_Multi_Thread_EOL_Update,0,2,['07_test.c:43: Failed to insert element[0] in arraylist.']
+06_ForEachNext_Single_Thread_EOL_Update,0,2,['06_test.c:22: Failed to insert element[0] in arraylist.']
+05_ForEachNext_Multi_Thread_Next_Item_Update,0,2,['05_test.c:48: Failed to insert element[0] in arraylist.']
+04_ForEachNext_Single_Thread_Next_Item_Update,0,2,['04_test.c:22: Failed to insert element[0] in arraylist.']
+03_ForEachInit_Multi_Thread_Barrier_Populated_List,0,2,['03_test.c:45: Failed to insert element[0] in arraylist.']
+02_ForEachInit_Multi_Thread_Populated_List,0,2,['02_test.c:41: Failed to insert element[0] in arraylist.']
+01_ForEachInit_Single_Thread_Populated_List,0,1,['01_test.c:21: Failed to insert element[0] in arraylist.']
+19_al_resize_list_smaller,0,2,"[""19_test.c:28: First Inserted item wasn't at 0 index RECIEVED: 1""]"
+18_al_resize_list_larger,0,2,"[""18_test.c:29: First Inserted item wasn't at 0 index RECIEVED: 1""]"
+17_al_mt_insert_delete_II,0,4,['17_test.c:103: Index 0 is not NULL']
+16_al_mt_insert_delete_II,0,4,['16_test.c:103: Index 0 is not NULL']
+15_al_mt_insert_delete_I,0,4,['15_test.c:61: Index 0 is not NULL']
+14_al_mt_alphabet_insert,4,4,
+13_al_mt_single_insert,4,4,
+12_al_delete_stress_test,0,4,"['12_test.c:70: capacity: EXPECTED: 3 RECEIVED: 6', '12_test.c:66: get_index_al [i = 0]: EXPECTED: 95.000000 RECEIVED: 0.000000']"
+11_al_insert_stress_test,4,4,
+10_al_remove_first,0,2,['The test crashed.']
+09_al_remove_null,0,2,['The test crashed.']
+08_al_get_null_data,0,2,"[""08_test.c:25: First Inserted item wasn't at 0 index RECIEVED: 4294967295""]"
+07_al_get_invalid_data,0,2,"[""07_test.c:26: First Inserted item wasn't at 0 index RECIEVED: 1""]"
+06_al_get_invalid,0,2,"[""06_test.c:26: First Inserted item wasn't at 0 index RECIEVED: 4294967295""]"
+05_al_delete_data,0,2,['05_test.c:24: remove_data_al: EXPECTED: true RECEIVED: false']
+04_al_retrieve_data,0,2,['04_test.c:26: get_index_al: EXPECTED: 3.600000 RECEIVED: 0.000000']
+03_al_insert_invalid,0,1,['The test crashed.']
+02_al_insert_valid,0,2,['02_test.c:24: insert_al: EXPECTED: 0 RECEIVED: -1']
+01_al_init,0,1,['01_test.c:20: length: EXPECTED: 0 RECEIVED: 33']
+Total,12,100,
